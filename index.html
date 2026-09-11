@@ -29,7 +29,7 @@ title: lyr.ai
       </a>
       {%- endif %}
       {%- if post.series %}
-      <p class="eyebrow">{{ post.series }}{% if post.experiment %} · Experiment {{ post.experiment }}{% endif %}</p>
+      <p class="eyebrow">{{ post.series }}{% if post.experiment %} · Experiment {{ post.experiment }}{% elsif post.entry %} · {{ post.entry }}{% endif %}</p>
       {%- endif %}
       <a class="title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
       <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %Y" }}</time>
