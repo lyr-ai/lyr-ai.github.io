@@ -17,6 +17,11 @@ The thread running through all of it: agents are stochastic systems, and most of
 what varies between two runs does not matter. Finding the part that *does* — early
 enough to act on it — is the problem I keep coming back to.
 
+## Writing
+
+Experiments and research notes are on the [front page]({{ '/' | relative_url }}),
+or by [RSS]({{ '/feed.xml' | relative_url }}).
+
 ## Systems
 
 - **[AgentSeism](https://github.com/lyr-ai/agentseism)** — measuring when

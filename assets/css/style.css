@@ -64,6 +64,10 @@ header.site nav a {
   text-decoration: none;
 }
 header.site nav a:hover { color: var(--link); }
+header.site nav a[aria-current="page"] { color: var(--fg); }
+
+/* The wordmark is a link home; make that visible rather than implied. */
+.wordmark:hover { color: var(--link); }
 
 a { color: var(--link); }
 
