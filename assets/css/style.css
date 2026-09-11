@@ -147,6 +147,76 @@ figcaption {
 }
 figcaption b { color: var(--fg); font-weight: 600; }
 
-/* Wide diagrams stay readable rather than shrinking to illegibility. */
-figure.wide img { min-width: 40rem; }
-figure.wide { overflow-x: auto; }
+/* Wide diagrams are legible via the full-size viewer, not by forcing the
+   article itself to scroll sideways. */
+figure.wide figcaption::after {
+  content: " Click to view full size.";
+}
+
+/* -- full-size figure viewer ------------------------------------------------ */
+
+.post figure a.zoom { display: block; cursor: zoom-in; }
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  padding: 1.5rem;
+  background: rgba(10, 10, 10, .93);
+}
+.lightbox[hidden] { display: none; }
+
+.lightbox-scroll {
+  max-width: 100%;
+  max-height: 85vh;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+}
+.lightbox img {
+  max-width: min(96vw, 1600px);
+  max-height: 85vh;
+  width: auto;
+  height: auto;
+  cursor: zoom-in;
+  background: #fff;
+  border-radius: 4px;
+}
+.lightbox.is-actual img {
+  max-width: none;
+  max-height: none;
+  cursor: zoom-out;
+}
+
+.lightbox-caption {
+  margin: 0;
+  max-width: 44rem;
+  color: #c9c9c5;
+  font-size: .82rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, .35);
+  border-radius: 4px;
+  color: #e8e8e6;
+  font: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .75rem;
+  padding: .25rem .5rem;
+  cursor: pointer;
+}
+.lightbox-close:hover { border-color: rgba(255, 255, 255, .7); }
+
+/* KaTeX display blocks scroll instead of overflowing the measure. */
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: .25rem 0; }

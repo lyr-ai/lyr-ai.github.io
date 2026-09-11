@@ -11,9 +11,10 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"
     onload="renderMathInElement(document.body, {delimiters: [
+      {left: '\\[', right: '\\]', display: true},
       {left: '$$', right: '$$', display: true},
       {left: '\\(', right: '\\)', display: false}
-    ]});"></script>
+    ], throwOnError: false});"></script>
   {%- endif %}
 </head>
 <body>
@@ -26,6 +27,8 @@
   </header>
 
   <main>{{ content }}</main>
+
+  <script defer src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>
 
   <footer class="site">
     <p>{{ site.tagline }} — <a href="https://github.com/{{ site.github_username }}">{{ site.author.name }}</a></p>
