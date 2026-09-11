@@ -220,3 +220,48 @@ figure.wide figcaption::after {
 
 /* KaTeX display blocks scroll instead of overflowing the measure. */
 .katex-display { overflow-x: auto; overflow-y: hidden; padding: .25rem 0; }
+
+/* -- series label ----------------------------------------------------------- */
+
+.eyebrow {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .7rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 .5rem;
+}
+
+/* -- home ------------------------------------------------------------------- */
+
+.intro .thesis {
+  font-size: 1.1rem;
+  color: var(--fg);
+  margin: 0 0 .75rem;
+}
+.intro .dek { font-size: .95rem; }
+
+.posts .cards li {
+  padding: 1.5rem 0 1.75rem;
+}
+.posts .cards li:first-child { padding-top: .5rem; }
+
+.posts .thumb {
+  display: block;
+  margin-bottom: 1rem;
+}
+.posts .thumb img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+.posts .cards time { margin-top: .3rem; }
+
+/* -- about ------------------------------------------------------------------ */
+
+.about h1 { margin-bottom: 1.25rem; }
+.about h2 { font-size: 1.05rem; }
+.about ul { padding-left: 1.1rem; }
+.about li { margin-bottom: .6rem; }

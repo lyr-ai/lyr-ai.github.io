@@ -16,10 +16,17 @@ Add `_posts/YYYY-MM-DD-slug.md`:
 title: "Post title"
 date: 2026-09-11
 description: One sentence. This is what search results and link previews show.
+image: /assets/img/hero.webp     # link-preview card, and the thumbnail on the home page
 repo: lyr-ai/agentseism          # optional: renders a "code for this post" banner
+series: Agent reliability        # optional: renders an eyebrow above the title
+experiment: "02"                 # optional: numbers the post within the series
 syndicated_to: https://medium.com/@ruxiz2005/...   # optional: a copy elsewhere
+math: true                       # optional: loads KaTeX for $$ ... $$ blocks
 ---
 ```
+
+`series` + `experiment` is what makes separate posts read as one research
+program rather than as unrelated essays. Keep the series name stable.
 
 **Canonical lives here.** `jekyll-seo-tag` emits `<link rel="canonical">`
 pointing at this site, so a syndicated copy should point back here rather than

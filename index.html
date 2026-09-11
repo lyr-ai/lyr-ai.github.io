@@ -4,10 +4,14 @@ title: lyr.ai
 ---
 
 <section class="intro">
-  <h1>Notes on agent reliability</h1>
-  <p>
-    Why AI agents behave inconsistently, and what can actually be measured about
-    it. Written alongside the code, not instead of it.
+  <h1>Experiments on AI agent reliability</h1>
+  <p class="thesis">
+    How execution variation propagates, when it affects outcomes, and whether
+    agents can be steered before failure.
+  </p>
+  <p class="dek">
+    Research notes written alongside working systems and reproducible
+    experiments.
   </p>
 </section>
 
@@ -16,9 +20,17 @@ title: lyr.ai
   {%- if site.posts.size == 0 %}
   <p class="empty">Nothing published yet.</p>
   {%- endif %}
-  <ul>
+  <ul class="cards">
     {%- for post in site.posts %}
     <li>
+      {%- if post.image %}
+      <a class="thumb" href="{{ post.url | relative_url }}" tabindex="-1" aria-hidden="true">
+        <img src="{{ post.image | relative_url }}" alt="" loading="lazy">
+      </a>
+      {%- endif %}
+      {%- if post.series %}
+      <p class="eyebrow">{{ post.series }}{% if post.experiment %} · Experiment {{ post.experiment }}{% endif %}</p>
+      {%- endif %}
       <a class="title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
       <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %Y" }}</time>
       {%- if post.description %}<p class="dek">{{ post.description }}</p>{% endif -%}
@@ -33,14 +45,17 @@ title: lyr.ai
     <li>
       <a href="https://github.com/lyr-ai/agentseism">AgentSeism</a>
       <p class="dek">
-        Localizing where LLM-agent executions are behaviorally fragile: repeated
-        runs, execution-feature projection, and which feature variations track
-        the outcome.
+        Measuring when execution variation becomes consequential, and testing
+        whether agents can be steered before failure. Built around state-level
+        instrumentation, replay, fork, and controlled intervention.
       </p>
     </li>
     <li>
       <a href="https://github.com/lyr-ai/typedmem">TypedMem</a>
-      <p class="dek">Schema-aware typed memory for AI agents.</p>
+      <p class="dek">
+        Schema-aware typed memory for AI agents — what an agent carries between
+        steps, and what that does to its behavior.
+      </p>
     </li>
     <li>
       <a href="https://github.com/lyr-ai/lyr">LYR</a>

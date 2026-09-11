@@ -8,6 +8,8 @@ description: >-
   differ, but which differences reach the outcome.
 image: /assets/img/same-state-different-futures.webp
 repo: lyr-ai/agentseism
+series: Agent reliability
+experiment: "01"
 syndicated_to: https://medium.com/@ruxiz2005/ai-agents-still-diverge-at-temperature-0-when-does-it-matter-f5abac008e17
 math: true
 ---
