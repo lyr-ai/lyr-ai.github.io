@@ -209,7 +209,10 @@ lowest estimated failure risk.
 The relevant metric is not whether the intervention makes trajectories look more
 similar. It is the change in externally measured success:
 
-$$\Delta_{\text{success}} = P(Y = \text{correct} \mid do(I)) - P(Y = \text{correct} \mid do(\text{no intervention})).$$
+$$\begin{aligned}
+\Delta_{\text{success}} &= P(Y = \text{correct} \mid do(I)) \\
+&\quad - P(Y = \text{correct} \mid do(\text{no intervention})).
+\end{aligned}$$
 
 This distinction is important because an intervention that reduces trajectory
 variance without increasing correctness has not improved reliability. Similarly,
