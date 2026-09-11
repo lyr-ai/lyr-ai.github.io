@@ -128,3 +128,25 @@ footer.site {
   color: var(--muted);
   font-size: .85rem;
 }
+
+figure {
+  margin: 2.5rem 0;
+}
+figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+figcaption {
+  margin-top: .6rem;
+  font-size: .85rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+figcaption b { color: var(--fg); font-weight: 600; }
+
+/* Wide diagrams stay readable rather than shrinking to illegibility. */
+figure.wide img { min-width: 40rem; }
+figure.wide { overflow-x: auto; }
