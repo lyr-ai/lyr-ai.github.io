@@ -73,7 +73,7 @@ months.
 
 <figure class="wide">
   <img src="/assets/img/retrieval-vs-resolution.png" alt="Long-term history feeds retrieval, which returns an older preference, a later constraint and a recent decision; a resolver turns those into a current state, which produces the answer." loading="lazy">
-  <figcaption><b>Figure 2.</b> Retrieval asks what is relevant. Memory resolution asks what is true now. Click to view full size.</figcaption>
+  <figcaption><b>Figure 2.</b> Retrieval asks what is relevant. Memory resolution asks what is true now.</figcaption>
 </figure>
 
 ## 2. Memory has different semantics
@@ -169,7 +169,7 @@ it, new evidence corrects it, a preference update qualifies it.
 
 <figure class="wide">
   <img src="/assets/img/memory-state-evolution.png" alt="A chain of states connected by labelled transitions — event, decision, new evidence, preference update — with past observations feeding individual states." loading="lazy">
-  <figcaption><b>Figure 3.</b> The important object is not an isolated memory item. It is the transition structure that explains how the present emerged from the past. Click to view full size.</figcaption>
+  <figcaption><b>Figure 3.</b> The important object is not an isolated memory item. It is the transition structure that explains how the present emerged from the past.</figcaption>
 </figure>
 
 The contrast is worth stating plainly:
@@ -231,7 +231,7 @@ like a continuously updated model of the user or environment.
 
 <figure class="wide">
   <img src="/assets/img/typedmem-update-loop.png" alt="A loop: new event, extract candidate memory, classify semantics, compare with existing state, then add, supersede, resolve or preserve with scope, feeding the current memory state used for future retrieval." loading="lazy">
-  <figcaption><b>Figure 4.</b> Proposed TypedMem loop. The important part is not the individual boxes but the cycle: observe, interpret, update state, use, observe again. Click to view full size.</figcaption>
+  <figcaption><b>Figure 4.</b> Proposed TypedMem loop. The important part is not the individual boxes but the cycle: observe, interpret, update state, use, observe again.</figcaption>
 </figure>
 
 ## 7. What I want to measure next

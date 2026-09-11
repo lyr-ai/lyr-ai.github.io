@@ -151,10 +151,20 @@ figcaption {
 }
 figcaption b { color: var(--fg); font-weight: 600; }
 
-/* Wide diagrams are legible via the full-size viewer, not by forcing the
-   article itself to scroll sideways. */
+/* A 4670px-wide flow diagram squeezed into the text measure is a 100px strip
+   nobody can read. Wide figures keep a legible height and scroll inside their
+   own box; the full-size viewer is still one click away. */
+figure.wide .zoom {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+figure.wide img {
+  width: auto;
+  max-width: none;
+  height: clamp(8rem, 20vh, 13rem);
+}
 figure.wide figcaption::after {
-  content: " Click to view full size.";
+  content: " Scroll to read, or click to view full size.";
 }
 
 /* -- full-size figure viewer ------------------------------------------------ */
