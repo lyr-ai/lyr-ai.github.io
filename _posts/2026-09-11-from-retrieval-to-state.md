@@ -27,7 +27,7 @@ versions of the same fact, contradictory statements, decisions that supersede
 earlier preferences, or goals that evolve across sessions.
 
 I encountered this while building [TypedMem](https://github.com/lyr-ai/typedmem)
-and [ReliAgent Bench](https://github.com/canis-minor/reliagent-bench). In the
+and [ReliAgent Bench](https://github.com/lyr-ai/reliagent-bench). In the
 benchmark, adding more retrieval was not enough. A memory system also needed to
 distinguish different kinds of remembered information, reason about temporal
 validity, and resolve which retrieved evidence should govern the current answer.

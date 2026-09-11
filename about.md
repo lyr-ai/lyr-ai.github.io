@@ -31,6 +31,9 @@ or by [RSS]({{ '/feed.xml' | relative_url }}).
 - **[TypedMem](https://github.com/lyr-ai/typedmem)** — schema-aware typed memory
   for AI agents: what an agent carries between steps, and what that does to its
   behavior.
+- **[ReliAgent Bench](https://github.com/lyr-ai/reliagent-bench)** — a
+  reproducible reliability benchmark for memory-enabled agents; the harness whose
+  failures drove the memory work.
 - **[LYR](https://github.com/lyr-ai/lyr)** — a layered knowledge engine.
 
 ## Elsewhere
