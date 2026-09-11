@@ -21,6 +21,10 @@
 
 * { box-sizing: border-box; }
 
+/* Safety net: a stale or missing rule below must never let an image blow the
+   page out sideways. */
+img { max-width: 100%; height: auto; }
+
 body {
   margin: 0;
   background: var(--bg);
