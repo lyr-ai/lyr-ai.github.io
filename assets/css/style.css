@@ -252,6 +252,7 @@ figure.wide figcaption::after {
 
 .posts .thumb {
   display: block;
+  max-width: 26rem;
   margin-bottom: 1rem;
 }
 .posts .thumb img {
