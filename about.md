@@ -5,7 +5,7 @@ permalink: /about/
 description: Ruxi Zhang — machine learning engineer working on reliable AI systems, agent execution, and ML infrastructure.
 ---
 
-<section class="about">
+<section class="about" markdown="1">
 
 # About
 
