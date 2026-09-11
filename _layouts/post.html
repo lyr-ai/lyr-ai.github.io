@@ -1,0 +1,32 @@
+---
+layout: default
+---
+<article class="post">
+  <h1>{{ page.title }}</h1>
+  <p class="meta">
+    <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time>
+    {%- if page.reading_time %} · {{ page.reading_time }} min read{% endif -%}
+  </p>
+
+  {%- if page.repo %}
+  <p class="repo-banner">
+    Code for this post: <a href="https://github.com/{{ page.repo }}">{{ page.repo }}</a>
+  </p>
+  {%- endif %}
+
+  {{ content }}
+
+  {%- if page.syndicated_to %}
+  <p class="syndication">
+    A version of this post also appears on
+    <a href="{{ page.syndicated_to }}" rel="nofollow">Medium</a>.
+    This page is the canonical copy.
+  </p>
+  {%- endif %}
+
+  <hr>
+  <p class="next">
+    Written while building <a href="https://github.com/lyr-ai/agentseism">AgentSeism</a>.
+    New posts by <a href="{{ '/feed.xml' | relative_url }}">RSS</a>.
+  </p>
+</article>

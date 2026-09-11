@@ -1,0 +1,50 @@
+---
+layout: default
+title: lyr.ai
+---
+
+<section class="intro">
+  <h1>Notes on agent reliability</h1>
+  <p>
+    Why AI agents behave inconsistently, and what can actually be measured about
+    it. Written alongside the code, not instead of it.
+  </p>
+</section>
+
+<section class="posts">
+  <h2>Writing</h2>
+  {%- if site.posts.size == 0 %}
+  <p class="empty">Nothing published yet.</p>
+  {%- endif %}
+  <ul>
+    {%- for post in site.posts %}
+    <li>
+      <a class="title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+      <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %Y" }}</time>
+      {%- if post.description %}<p class="dek">{{ post.description }}</p>{% endif -%}
+    </li>
+    {%- endfor %}
+  </ul>
+</section>
+
+<section class="projects">
+  <h2>Projects</h2>
+  <ul>
+    <li>
+      <a href="https://github.com/lyr-ai/agentseism">AgentSeism</a>
+      <p class="dek">
+        Localizing where LLM-agent executions are behaviorally fragile: repeated
+        runs, execution-feature projection, and which feature variations track
+        the outcome.
+      </p>
+    </li>
+    <li>
+      <a href="https://github.com/lyr-ai/typedmem">TypedMem</a>
+      <p class="dek">Schema-aware typed memory for AI agents.</p>
+    </li>
+    <li>
+      <a href="https://github.com/lyr-ai/lyr">LYR</a>
+      <p class="dek">A layered knowledge engine.</p>
+    </li>
+  </ul>
+</section>

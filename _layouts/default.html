@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {%- seo -%}
+  <link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ '/feed.xml' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+</head>
+<body>
+  <header class="site">
+    <a class="wordmark" href="{{ '/' | relative_url }}">{{ site.title }}</a>
+    <nav>
+      <a href="https://github.com/{{ site.github_username }}">GitHub</a>
+      <a href="{{ '/feed.xml' | relative_url }}">RSS</a>
+    </nav>
+  </header>
+
+  <main>{{ content }}</main>
+
+  <footer class="site">
+    <p>{{ site.tagline }} — <a href="https://github.com/{{ site.github_username }}">{{ site.author.name }}</a></p>
+  </footer>
+</body>
+</html>

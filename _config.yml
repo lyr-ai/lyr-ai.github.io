@@ -1,0 +1,30 @@
+title: lyr.ai
+tagline: Notes on agent reliability
+description: >-
+  Research notes on why AI agents behave inconsistently, and what can be
+  measured about it. Written alongside the code: AgentSeism, TypedMem, LYR.
+url: https://lyr-ai.github.io
+baseurl: ""
+author:
+  name: Ruxi Zhang
+
+github_username: lyr-ai
+medium_url: https://medium.com/@ruxiz2005
+
+plugins:
+  - jekyll-feed      # /feed.xml
+  - jekyll-sitemap   # /sitemap.xml
+  - jekyll-seo-tag   # <title>, description, canonical, OpenGraph/Twitter cards
+
+# Canonical lives here. A post syndicated elsewhere sets `syndicated_to:` in its
+# front matter, which renders a "first published at" line -- the copy points
+# back at this site, not the other way round.
+
+defaults:
+  - scope: { path: "", type: "posts" }
+    values: { layout: "post" }
+
+permalink: /:title/
+timezone: America/Los_Angeles
+
+exclude: [README.md, Gemfile, Gemfile.lock, vendor]
