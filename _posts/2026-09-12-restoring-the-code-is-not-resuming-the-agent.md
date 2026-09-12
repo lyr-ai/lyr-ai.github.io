@@ -1,6 +1,6 @@
 ---
 title: "Restoring the code is not resuming the agent"
-date: 2026-09-12 15:00:00 -0700
+date: 2026-09-12 14:00:00 -0700
 description: >-
   What building replay for long-running coding agents taught me about
   checkpointing, recovery, and durable agent infrastructure — checkpoint
