@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1150" width="1500" height="1150" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title>Control plane and data plane for a durable agent runtime</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9fb3c8"/>
+    </marker>
+    <style>
+      .panel { fill: #f7f8fa; stroke: #e2e5ea; stroke-width: 2; }
+      .panel-title { font-size: 20px; letter-spacing: .12em; fill: #333; }
+      .box { fill: #e8f2fc; stroke: #a9c6e6; stroke-width: 2; }
+      .label { font-size: 24px; font-weight: 700; fill: #1b4f9c; text-anchor: middle; }
+      .edge { fill: none; stroke: #9fb3c8; stroke-width: 2.5; marker-end: url(#arrow); }
+      .edge-label { font-size: 19px; fill: #4a5563; font-style: italic; }
+    </style>
+  </defs>
+
+  <rect width="1500" height="1150" fill="#ffffff"/>
+
+  <!-- CONTROL PLANE -->
+  <rect class="panel" x="50" y="40" width="1400" height="360" rx="18"/>
+  <text class="panel-title" x="80" y="78">CONTROL PLANE</text>
+
+  <rect class="box" x="100" y="120" width="220" height="64" rx="14"/>
+  <text class="label" x="210" y="160">Job API</text>
+
+  <rect class="box" x="400" y="120" width="240" height="64" rx="14"/>
+  <text class="label" x="520" y="160">Durable Queue</text>
+
+  <rect class="box" x="900" y="120" width="220" height="64" rx="14"/>
+  <text class="label" x="1010" y="160">Scheduler</text>
+
+  <rect class="box" x="100" y="280" width="240" height="64" rx="14"/>
+  <text class="label" x="220" y="320">Checkpoint Metadata</text>
+
+  <rect class="box" x="400" y="280" width="240" height="64" rx="14"/>
+  <text class="label" x="520" y="320">Recovery Head</text>
+
+  <rect class="box" x="720" y="280" width="240" height="64" rx="14"/>
+  <text class="label" x="840" y="320">Lease / Fencing</text>
+
+  <!-- control-plane edges -->
+  <path class="edge" d="M 320 152 L 396 152"/>
+  <path class="edge" d="M 640 152 L 896 152"/>
+  <path class="edge" d="M 340 312 L 396 312"/>
+  <path class="edge" d="M 520 280 L 520 232 L 950 232 L 950 188"/>
+  <path class="edge" d="M 960 280 L 960 250 L 1000 250 L 1000 188"/>
+
+  <!-- STORES, between the planes -->
+  <g id="blob-store">
+    <path class="box" d="M 350 484 A 130 14 0 0 1 610 484 L 610 576 A 130 14 0 0 1 350 576 Z"/>
+    <ellipse class="box" cx="480" cy="484" rx="130" ry="14"/>
+    <text class="label" x="480" y="540">Checkpoint Blob Store</text>
+  </g>
+  <g id="event-store">
+    <path class="box" d="M 670 484 A 130 14 0 0 1 930 484 L 930 576 A 130 14 0 0 1 670 576 Z"/>
+    <ellipse class="box" cx="800" cy="484" rx="130" ry="14"/>
+    <text class="label" x="800" y="540">Event / Trace Store</text>
+  </g>
+
+  <!-- DATA PLANE -->
+  <rect class="panel" x="50" y="660" width="1400" height="450" rx="18"/>
+  <text class="panel-title" x="80" y="698">DATA PLANE</text>
+
+  <rect class="box" x="900" y="740" width="220" height="64" rx="14"/>
+  <text class="label" x="1010" y="780">Worker</text>
+
+  <rect class="box" x="900" y="860" width="220" height="64" rx="14"/>
+  <text class="label" x="1010" y="900">Sandbox</text>
+
+  <rect class="box" x="900" y="980" width="220" height="64" rx="14"/>
+  <text class="label" x="1010" y="1020">Agent Runtime</text>
+
+  <rect class="box" x="1210" y="860" width="230" height="64" rx="14"/>
+  <text class="label" x="1325" y="900">Model Gateway</text>
+
+  <rect class="box" x="1210" y="980" width="230" height="64" rx="14"/>
+  <text class="label" x="1325" y="1012">Tool / Effect</text>
+  <text class="label" x="1325" y="1036" font-size="20">Service</text>
+
+  <!-- data-plane edges -->
+  <path class="edge" d="M 1010 804 L 1010 856"/>
+  <path class="edge" d="M 1010 924 L 1010 976"/>
+  <path class="edge" d="M 1120 1000 L 1160 1000 L 1160 892 L 1206 892"/>
+  <path class="edge" d="M 1120 1024 L 1206 1024"/>
+
+  <!-- edges that cross the boundary -->
+  <!-- scheduler -> worker: the lease -->
+  <path class="edge" d="M 1080 184 L 1080 736"/>
+  <text class="edge-label" x="1096" y="524">lease, generation n</text>
+
+  <!-- agent runtime -> event store -->
+  <path class="edge" d="M 900 976 L 800 976 L 800 594"/>
+  <text class="edge-label" x="814" y="820">events</text>
+
+  <!-- agent runtime -> blob store: unconditional -->
+  <path class="edge" d="M 900 1000 L 480 1000 L 480 594"/>
+  <text class="edge-label" x="494" y="820">immutable blobs</text>
+  <text class="edge-label" x="494" y="846">(any generation)</text>
+
+  <!-- agent runtime -> checkpoint metadata: fenced -->
+  <path class="edge" d="M 900 1024 L 180 1024 L 180 348"/>
+  <text class="edge-label" x="196" y="820">publish manifest,</text>
+  <text class="edge-label" x="196" y="846">fenced by generation</text>
+</svg>
