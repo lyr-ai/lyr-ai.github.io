@@ -20,6 +20,28 @@ plugins:
 # front matter, which renders a "first published at" line -- the copy points
 # back at this site, not the other way round.
 
+# The home page groups posts by `series`. Order here is reading order, not
+# alphabetical; a post whose series is not listed still appears, under
+# "Elsewhere". Keep the names identical to the front matter.
+series:
+  - name: Agent reliability
+    blurb: >-
+      Run the same agent on the same task many times. Where does behaviour
+      vary, which variation reaches the outcome, and how do you measure that
+      without fooling yourself?
+  - name: Agent runtime
+    blurb: >-
+      Replay, checkpointing and recovery. What a long-running agent's state
+      actually is, and what it takes to resume it.
+  - name: Agent memory
+    blurb: >-
+      What an agent carries between steps, and why long-term memory is a state
+      problem before it is a retrieval problem.
+  - name: AI systems
+    blurb: >-
+      The inference and serving infrastructure underneath agent workloads,
+      learned by deploying it.
+
 defaults:
   - scope: { path: "", type: "posts" }
     values: { layout: "post" }

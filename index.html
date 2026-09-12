@@ -15,28 +15,83 @@ title: lyr.ai
   </p>
 </section>
 
+{%- comment -%}
+Posts are grouped by `series` (see _config.yml for the order and blurbs).
+Within a series they run oldest first, because the entries are numbered and
+meant to be read in order. Anything whose series is not declared falls
+through to "Elsewhere" so a new post is never silently hidden.
+{%- endcomment -%}
+{%- assign declared = site.series | map: "name" %}
+
 <section class="posts">
   <h2>Writing</h2>
   {%- if site.posts.size == 0 %}
   <p class="empty">Nothing published yet.</p>
+  {%- else %}
+  <nav class="series-nav" aria-label="Series">
+    <ul>
+      {%- for s in site.series %}
+      {%- assign in_series = site.posts | where: "series", s.name %}
+      {%- if in_series.size > 0 %}
+      <li><a href="#{{ s.name | slugify }}">{{ s.name }}</a><span class="count">{{ in_series.size }}</span></li>
+      {%- endif %}
+      {%- endfor %}
+    </ul>
+  </nav>
   {%- endif %}
-  <ul class="cards">
-    {%- for post in site.posts %}
-    <li>
-      {%- if post.image %}
-      <a class="thumb" href="{{ post.url | relative_url }}" tabindex="-1" aria-hidden="true">
-        <img src="{{ post.image | relative_url }}" alt="" loading="lazy">
-      </a>
-      {%- endif %}
-      {%- if post.series %}
-      <p class="eyebrow">{{ post.series }}{% if post.experiment %} · Experiment {{ post.experiment }}{% elsif post.entry %} · {{ post.entry }}{% endif %}</p>
-      {%- endif %}
-      <a class="title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
-      <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %Y" }}</time>
-      {%- if post.description %}<p class="dek">{{ post.description }}</p>{% endif -%}
-    </li>
-    {%- endfor %}
-  </ul>
+
+  {%- for s in site.series %}
+  {%- assign in_series = site.posts | where: "series", s.name | reverse %}
+  {%- if in_series.size > 0 %}
+  <section class="series" id="{{ s.name | slugify }}">
+    <h3>{{ s.name }}</h3>
+    {%- if s.blurb %}<p class="dek series-blurb">{{ s.blurb }}</p>{% endif %}
+    <ul class="cards">
+      {%- for post in in_series %}
+      <li>
+        {%- if post.image %}
+        <a class="thumb" href="{{ post.url | relative_url }}" tabindex="-1" aria-hidden="true">
+          <img src="{{ post.image | relative_url }}" alt="" loading="lazy">
+        </a>
+        {%- endif %}
+        {%- if post.experiment %}<p class="eyebrow">Experiment {{ post.experiment }}</p>
+        {%- elsif post.entry %}<p class="eyebrow">{{ post.entry }}</p>{% endif %}
+        <a class="title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %Y" }}</time>
+        {%- if post.description %}<p class="dek">{{ post.description }}</p>{% endif -%}
+      </li>
+      {%- endfor %}
+    </ul>
+  </section>
+  {%- endif %}
+  {%- endfor %}
+
+  {%- assign shown_other_heading = false %}
+  {%- for post in site.posts %}
+  {%- unless declared contains post.series %}
+  {%- unless shown_other_heading %}
+  <section class="series" id="elsewhere">
+    <h3>Elsewhere</h3>
+    <ul class="cards">
+  {%- assign shown_other_heading = true %}
+  {%- endunless %}
+      <li>
+        {%- if post.image %}
+        <a class="thumb" href="{{ post.url | relative_url }}" tabindex="-1" aria-hidden="true">
+          <img src="{{ post.image | relative_url }}" alt="" loading="lazy">
+        </a>
+        {%- endif %}
+        {%- if post.series %}<p class="eyebrow">{{ post.series }}{% if post.entry %} · {{ post.entry }}{% endif %}</p>{% endif %}
+        <a class="title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %Y" }}</time>
+        {%- if post.description %}<p class="dek">{{ post.description }}</p>{% endif -%}
+      </li>
+  {%- endunless %}
+  {%- endfor %}
+  {%- if shown_other_heading %}
+    </ul>
+  </section>
+  {%- endif %}
 </section>
 
 <section class="projects">

@@ -278,6 +278,45 @@ figure.wide figcaption::after {
 }
 .posts .cards time { margin-top: .3rem; }
 
+/* -- home: posts grouped by series ----------------------------------------- */
+
+/* One line of series names with counts, so the whole site is legible before
+   any scrolling. Anchors jump to the group below. */
+.series-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem 1.25rem;
+  margin: .25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.series-nav li {
+  padding: 0;
+  border: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .8rem;
+}
+.series-nav a { text-decoration: none; }
+.series-nav a:hover { text-decoration: underline; }
+.series-nav .count {
+  margin-left: .4rem;
+  color: var(--muted);
+}
+
+.posts .series { margin-top: 2.5rem; }
+.posts .series h3 {
+  margin: 0 0 .25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-size: 1.1rem;
+}
+.posts .series-blurb { margin: 0 0 .5rem; }
+.posts .series li:last-child { border-bottom: 0; }
+
+/* Thumbnails are smaller inside a group: the group heading now carries the
+   orientation the big card used to. */
+.posts .series .thumb { max-width: 20rem; }
+
 /* -- about ------------------------------------------------------------------ */
 
 .about h1 { margin-bottom: 1.25rem; }
