@@ -2,37 +2,35 @@
 title: "Restoring the code is not resuming the agent"
 date: 2026-09-12 14:00:00 -0700
 description: >-
-  What building replay for long-running coding agents taught me about
-  checkpointing, recovery, and durable agent infrastructure — checkpoint
-  consistency, execution ownership, fencing, and why resume is a continuation
-  rather than a replay.
+  What agent replay taught me about durable execution: checkpoint consistency,
+  execution ownership, fencing, and why resume is a continuation rather than a
+  replay.
 image: /assets/img/recovery-vs-replay.png
 repo: lyr-ai/agentseism
 series: Agent runtime
 entry: "Field note 02"
 ---
 
-*What building replay for long-running coding agents taught me about
-checkpointing, recovery, and durable agent infrastructure.*
+*What agent replay taught me about durable execution.*
 
-Long-running AI agents increasingly look less like individual model calls and
-more like distributed workflows. They execute tools, modify files, accumulate
-context, wait on external systems, and may run for tens of minutes or hours —
-on one fixed task I measured runs from three minutes to over six. While
-building replay and fork support for
-[AgentSeism](https://github.com/lyr-ai/agentseism), I initially assumed that
-restoring a coding agent would be straightforward: reconstruct the repository
-at a recorded step, restore the conversation, and continue.
+While building replay support for
+[AgentSeism](https://github.com/lyr-ai/agentseism), I tried to resume two
+coding-agent executions from exactly the same repository state. The source
+fingerprint matched byte for byte. The executions did not.
 
-The first validation showed why that model was incomplete. Two executions
-could reach exactly the same tracked source state while carrying different
-scratch files and different histories. Restoring only the repository produced
-something that looked correct according to the source fingerprint, but it was
-not the same agent execution.
+One carried a different scratch file. Their message histories were different.
+Restoring the repository gave me a state that looked correct according to my
+instrumentation, but it was not the same agent execution.
 
-That changed the question from "How do I save the workspace?" to **"What does
-it actually mean to resume an agent?"** Following that question led quickly
-into classic distributed-systems problems: checkpoint consistency, execution
+That failure changed how I think about long-running agents. Once an agent
+executes tools, modifies an environment, accumulates context, and runs for
+minutes or hours — on one fixed task I measured runs from three minutes to
+over six hours — recovery stops looking like "reload the prompt and workspace"
+and starts looking like a distributed-systems problem.
+
+I had started with a simple question: "How do I save the workspace?" The
+experiment forced a harder one: **"What does it actually mean to resume an
+agent?"** Following it led quickly into checkpoint consistency, execution
 ownership, fencing, idempotency, replay semantics, and external side effects.
 
 ## 1. Repository state is only part of agent state
@@ -42,10 +40,10 @@ one of the easiest pieces to measure objectively. In AgentSeism, tracked source
 state is represented using a canonical Git diff, so two executions can be
 compared without interpreting model reasoning.
 
-During fork validation, however, executions that shared the same tracked source
-state still differed elsewhere. One had written a reproduction script; another
-had written a different scratch file; their message histories differed. The
-source code was identical; the complete execution state was not.
+That is what made the pair in the opening measurable in the first place: the
+same canonical diff, byte for byte. Everything the diff does not cover —
+scratch files, message history — was different. The source code was identical;
+the complete execution state was not.
 
 <figure class="wide">
   <img src="/assets/img/agent-execution-state.png" alt="Agent execution state decomposed into message history, tracked repository state, untracked scratch workspace, tool observations, step/token/cost budgets, and external-effect state." loading="lazy">
