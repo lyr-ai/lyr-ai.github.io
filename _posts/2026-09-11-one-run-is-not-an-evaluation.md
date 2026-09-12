@@ -64,7 +64,7 @@ A single execution therefore measures something closer to
 
 $$Y_{i,r}$$
 
-— the outcome of run $r$ on task $i$ — than an intrinsic property of the agent.
+— the outcome of run \(r\) on task \(i\) — than an intrinsic property of the agent.
 What we usually care about is a distribution:
 
 $$P(Y \mid \text{agent}, \text{task}, \text{protocol}).$$
@@ -202,8 +202,7 @@ the assumption was false. Changing the instrumentation to make those cases
 disappear would no longer have been fixing a measurement; it would have been
 deleting a real topology my conceptual model failed to represent.
 
-So I kept the observation and expanded the representation to a triple $(D, R,
-F)$ — divergence, non-empty reconvergence, final convergence — which describes
+So I kept the observation and expanded the representation to a triple \((D, R, F)\) — divergence, non-empty reconvergence, final convergence — which describes
 the three observed cases directly:
 
 ```text
