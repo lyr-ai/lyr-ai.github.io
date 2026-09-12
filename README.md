@@ -28,6 +28,15 @@ math: true                       # optional: loads KaTeX for $$ ... $$ blocks
 `series` + `experiment` is what makes separate posts read as one research
 program rather than as unrelated essays. Keep the series name stable.
 
+## Math
+
+Set `math: true` and write **display** math as `$$ ... $$` on its own lines.
+
+Inline math needs **double** backslashes: `\\(t\\)`, not `\(t\)` and not
+`$t$`. kramdown eats a single backslash as an escape and does not treat a single
+`$` as math, so both of the wrong forms ship as visible junk in the rendered
+page — and the source looks fine either way, so check the rendered text.
+
 **Canonical lives here.** `jekyll-seo-tag` emits `<link rel="canonical">`
 pointing at this site, so a syndicated copy should point back here rather than
 the other way round. `syndicated_to` only renders a "also appears on" line; it
