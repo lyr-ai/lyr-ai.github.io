@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title>One memory over time: observed time and valid time are different axes, and a low-authority inference bounces off the provenance guard</title>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8a97a8"/>
+    </marker>
+    <marker id="arr-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#c8503c"/>
+    </marker>
+    <style>
+      .axis { stroke: #c9d0da; stroke-width: 2; }
+      .axis-label { font-size: 22px; fill: #6b7482; letter-spacing: .14em; }
+      .tick { stroke: #c9d0da; stroke-width: 2; }
+      .tick-label { font-size: 20px; fill: #6b7482; text-anchor: middle; }
+      .state { fill: #e8f2fc; stroke: #a9c6e6; stroke-width: 2.5; }
+      .state-closed { fill: #f1f4f8; stroke: #c9d0da; stroke-width: 2.5; }
+      .state-label { font-size: 30px; font-weight: 700; fill: #1b4f9c; text-anchor: middle; }
+      .state-sub { font-size: 19px; fill: #4a5563; text-anchor: middle; font-style: italic; }
+      .obs { fill: #1b4f9c; }
+      .obs-label { font-size: 20px; fill: #1b4f9c; }
+      .link { stroke: #8a97a8; stroke-width: 2; stroke-dasharray: 6 6; fill: none; }
+      .reject { fill: #fbeae7; stroke: #c8503c; stroke-width: 2.5; }
+      .reject-label { font-size: 26px; font-weight: 700; fill: #a83e2c; text-anchor: middle; }
+      .reject-sub { font-size: 19px; fill: #a83e2c; text-anchor: middle; font-style: italic; }
+      .guard { stroke: #c8503c; stroke-width: 5; }
+      .guard-label { font-size: 20px; fill: #a83e2c; letter-spacing: .12em; }
+      .caption { font-size: 22px; fill: #4a5563; }
+      .caption b { font-weight: 700; fill: #1a1a1a; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="#fdfdfc"/>
+
+  <!-- ============ VALID TIME (top axis) ============ -->
+  <text class="axis-label" x="120" y="150">VALID TIME</text>
+  <line class="axis" x1="120" y1="300" x2="1480" y2="300" marker-end="url(#arr)"/>
+
+  <!-- ticks on valid time -->
+  <line class="tick" x1="300" y1="290" x2="300" y2="310"/>
+  <text class="tick-label" x="300" y="345">two years ago</text>
+  <line class="tick" x1="1000" y1="290" x2="1000" y2="310"/>
+  <text class="tick-label" x="1000" y="345">a month ago</text>
+  <line class="tick" x1="1360" y1="290" x2="1360" y2="310"/>
+  <text class="tick-label" x="1360" y="345">now</text>
+
+  <!-- San Jose state: [two years ago, a month ago) -->
+  <rect class="state-closed" x="300" y="190" width="700" height="80" rx="16"/>
+  <text class="state-label" x="650" y="228" fill="#4a5563">lives in San Jose</text>
+  <text class="state-sub" x="650" y="256">valid_to = a month ago — closed, not deleted</text>
+  <!-- half-open marker -->
+  <line x1="1000" y1="186" x2="1000" y2="274" stroke="#4a5563" stroke-width="3"/>
+  <circle cx="1000" cy="230" r="9" fill="#fdfdfc" stroke="#4a5563" stroke-width="3"/>
+
+  <!-- Seattle state: [a month ago, open) -->
+  <rect class="state" x="1000" y="190" width="440" height="80" rx="16"/>
+  <text class="state-label" x="1220" y="228">lives in Seattle</text>
+  <text class="state-sub" x="1220" y="256">valid_from = a month ago</text>
+  <circle cx="1000" cy="230" r="9" fill="#1b4f9c"/>
+
+  <!-- ============ OBSERVED TIME (bottom axis) ============ -->
+  <text class="axis-label" x="120" y="470">OBSERVED TIME</text>
+  <line class="axis" x1="120" y1="620" x2="1480" y2="620" marker-end="url(#arr)"/>
+
+  <line class="tick" x1="300" y1="610" x2="300" y2="630"/>
+  <text class="tick-label" x="300" y="665">two years ago</text>
+  <line class="tick" x1="1180" y1="610" x2="1180" y2="630"/>
+  <text class="tick-label" x="1180" y="665">last week</text>
+  <line class="tick" x1="1300" y1="610" x2="1300" y2="630"/>
+  <text class="tick-label" x="1300" y="665">yesterday</text>
+
+  <!-- observation 1: user said San Jose -->
+  <circle class="obs" cx="300" cy="620" r="12"/>
+  <text class="obs-label" x="322" y="548">user says</text>
+  <text class="obs-label" x="322" y="575" font-weight="700">"I live in San Jose"</text>
+  <path class="link" d="M 300 605 L 300 275"/>
+
+  <!-- observation 3: user said moved a month ago -->
+  <circle class="obs" cx="1300" cy="620" r="12"/>
+  <text class="obs-label" x="1278" y="548" text-anchor="end">user says</text>
+  <text class="obs-label" x="1278" y="575" text-anchor="end" font-weight="700">"I moved a month ago"</text>
+  <!-- link from yesterday's observation back to a-month-ago validity -->
+  <path class="link" d="M 1300 605 L 1300 420 L 1000 420 L 1000 275" marker-end="url(#arr)"/>
+  <text class="state-sub" x="1150" y="410" fill="#6b7482">observed yesterday, true since a month ago</text>
+
+  <!-- observation 2: model inference, rejected -->
+  <circle cx="1180" cy="620" r="12" fill="#c8503c"/>
+  <rect class="reject" x="960" y="720" width="440" height="110" rx="16"/>
+  <text class="reject-label" x="1180" y="765">model infers "Seattle"</text>
+  <text class="reject-sub" x="1180" y="796">confidence 0.95 · authority 0.3</text>
+  <text class="reject-sub" x="1180" y="820">vs. explicit statement, authority 1.0</text>
+  <!-- attempted write, bouncing off the guard -->
+  <path d="M 1180 716 L 1180 700" stroke="#c8503c" stroke-width="2.5" fill="none" marker-end="url(#arr-red)"/>
+
+  <!-- provenance guard: a bar the inference cannot cross -->
+  <line class="guard" x1="960" y1="690" x2="1400" y2="690"/>
+  <text class="guard-label" x="940" y="697" text-anchor="end">PROVENANCE GUARD</text>
+  <!-- bounce marks -->
+  <path d="M 1150 705 L 1130 690 M 1210 705 L 1230 690" stroke="#c8503c" stroke-width="2.5" fill="none"/>
+
+  <!-- caption -->
+  <text class="caption" x="120" y="862">
+    <tspan font-weight="700" fill="#1a1a1a">Same memory, two axes.</tspan>
+    <tspan> The inference is more confident and more recent than the statement it would overwrite — and loses anyway.</tspan>
+  </text>
+  <text class="caption" x="120" y="892">The move is recorded when the user says so, and valid from when it happened.</text>
+</svg>
