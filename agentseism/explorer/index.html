@@ -6,97 +6,112 @@
 <title>What the average hides · AgentSeism</title>
 <meta name="description" content="An agent's score fell 14 points. One capability disappeared. Play the pull request and see what the average hides.">
 <meta property="og:title" content="What the average hides">
-<meta property="og:description" content="The average fell 14 points. One capability disappeared. Play the PR.">
+<meta property="og:description" content="The average fell 14 points. One capability disappeared. Small tremors are normal; this is a structural fall.">
 <meta property="og:image" content="https://lyr-ai.github.io/assets/img/agentseism-social-preview.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+/* Seismic Paper: paper, not dashboard. Ink, not UI chrome. Measurements, not widgets.
+   Tremors encode noise. Ruptures encode regressions. Cinnabar is reserved for structural failure. */
 :root {
-  --bg: #fbfbfa; --panel: #ffffff; --text: #1f2328; --muted: #59636e; --faint: #eaeef2; --band: #f3f5f7;
-  --border: #d0d7de; --green: #1a7f37; --red: #cf222e; --red-bg: #ffebe9;
-  --amber: #9a6700; --amber-bg: #fff8c5; --accent: #0969da;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --paper: #f5f0e6; --ink: #2a2826; --muted: #7a7368; --rule: #d8cfbf; --wash: #ede5d6;
+  --sage: #4f6f58; --cinnabar: #b8432c; --cinnabar-wash: #f1ddd3; --ochre: #9c7424;
+  --serif: Newsreader, Georgia, "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {       /* night paper: warm, not a console */
   :root:not([data-theme="light"]) {
-    --bg: #0d1117; --panel: #0d1117; --text: #e6edf3; --muted: #9198a1; --faint: #21262d; --band: #161b22;
-    --border: #3d444d; --green: #3fb950; --red: #f85149; --red-bg: #2d1215;
-    --amber: #d29922; --amber-bg: #2b2111; --accent: #4493f8;
+    --paper: #1a1916; --ink: #ebe5d9; --muted: #9c9587; --rule: #3b3731; --wash: #24221e;
+    --sage: #93b69d; --cinnabar: #e2765c; --cinnabar-wash: #3a231d; --ochre: #d0a95b;
   }
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); }
-main { max-width: 900px; margin: 0 auto; padding: 28px 20px 56px; }
-.kicker { font: 600 12px var(--mono); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
-h1 { font-size: 30px; margin: 6px 0 4px; }
-.lede { color: var(--muted); margin: 0 0 18px; max-width: 64ch; line-height: 1.5; }
-.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
-button { font: 500 14px var(--sans); border: 1px solid var(--border); background: var(--panel); color: var(--text);
-  border-radius: 999px; padding: 7px 14px; cursor: pointer; }
-.tabs button[aria-selected="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
-.caption { font-size: 22px; font-weight: 700; margin: 4px 0 2px; min-height: 1.4em; }
-.sub { color: var(--muted); margin: 0 0 12px; font-size: 14px; min-height: 1.3em; }
-.controls { display: flex; gap: 8px; margin: 6px 0 14px; }
-.controls .primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+main { max-width: 880px; margin: 0 auto; padding: 36px 22px 64px; }
+.fig { font: 500 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 600 40px/1.1 var(--serif); margin: 8px 0 8px; letter-spacing: -.01em; }
+.lede { font: 400 19px/1.5 var(--serif); color: var(--muted); margin: 0 0 22px; max-width: 58ch; }
+.tabs { display: flex; gap: 22px; flex-wrap: wrap; margin: 0 0 26px; border-bottom: 1px solid var(--rule); }
+.tabs button { background: none; border: 0; padding: 6px 0 10px; font: 500 14px var(--sans); color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+.caption { font: 400 24px/1.3 var(--serif); margin: 0 0 4px; min-height: 1.3em; }
+.caption em { color: var(--cinnabar); }
+.sub { font: italic 400 16px var(--serif); color: var(--muted); margin: 0 0 16px; min-height: 1.3em; }
+.controls { display: flex; gap: 18px; align-items: center; margin: 0 0 18px; }
+.controls button { background: none; border: 0; padding: 0; cursor: pointer; font: 600 14px var(--sans); color: var(--ink); border-bottom: 1px solid var(--ink); }
+.controls button.quiet { font-weight: 500; color: var(--muted); border-bottom-color: var(--rule); }
 svg { display: block; }
-svg text { font-family: var(--sans); }
 .cap { cursor: pointer; }
-#versus { margin-top: 20px; }
-.thesis { font-size: 26px; font-weight: 800; line-height: 1.25; margin: 0 0 14px; max-width: 30ch; }
-.thesis .hot { color: var(--red); }
-#decision { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); }
-.gates { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; font-size: 15px; }
-.pill { display: inline-block; font: 700 13px var(--sans); padding: 3px 10px; border-radius: 999px; border: 1px solid; margin-left: 6px; }
-.pill.PASS { color: var(--green); border-color: var(--green); }
-.pill.REGRESSION { color: var(--red); border-color: var(--red); background: var(--red-bg); }
-.pill.INSUFFICIENT { color: var(--amber); border-color: var(--amber); background: var(--amber-bg); }
-.pill.NOTMON { color: var(--muted); border-color: var(--border); }
-.verdict { font-size: 17px; font-weight: 800; }
-.decline { color: var(--muted); font-size: 14px; margin: 10px 0 0; max-width: 72ch; line-height: 1.5; }
-.links { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
-.links button { font-size: 13px; padding: 5px 12px; }
-#evidence { margin-top: 28px; padding-top: 18px; border-top: 1px dashed var(--border); }
-#evidence h2 { font-size: 20px; margin: 0 0 4px; }
-#evidence p { color: var(--muted); line-height: 1.5; max-width: 72ch; }
-#evidence .final { color: var(--text); font-weight: 700; font-size: 17px; }
+.traceNote { font: italic 400 14px var(--serif); color: var(--muted); margin: 4px 0 0; min-height: 1.2em; }
+#climax { margin-top: 30px; }
+.nums { display: flex; align-items: flex-end; gap: 44px; flex-wrap: wrap; }
+.nums .k { font: 500 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+.nums .small { font: 400 96px/0.9 var(--serif); color: var(--muted); }
+.nums .huge { font: 400 190px/0.8 var(--serif); color: var(--cinnabar); letter-spacing: -.02em; }
+.nums .hot .k { color: var(--cinnabar); }
+.thesis { font: 400 30px/1.25 var(--serif); margin: 26px 0 0; max-width: 26ch; }
+.thesis em { color: var(--cinnabar); }
+#rules { margin-top: 18px; }
+#conclusion { margin-top: 34px; padding-top: 18px; border-top: 1px solid var(--rule); }
+.concl { display: grid; grid-template-columns: max-content 1fr; gap: 8px 22px; align-items: baseline; font: 400 18px var(--serif); }
+.concl .g { font: 500 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.mark-pass { color: var(--sage); } .mark-fail { color: var(--cinnabar); } .mark-wait { color: var(--ochre); } .mark-none { color: var(--muted); }
+.verdictline { font: 600 22px var(--serif); margin: 16px 0 4px; }
+.explain { font: 400 16px/1.5 var(--serif); color: var(--muted); margin: 6px 0 0; max-width: 62ch; }
+.more { margin-top: 14px; display: flex; gap: 22px; flex-wrap: wrap; }
+.more button { background: none; border: 0; padding: 0; cursor: pointer; font: 500 14px var(--sans); color: var(--ink); border-bottom: 1px solid var(--rule); }
+#evidence { margin-top: 38px; padding-top: 18px; border-top: 1px solid var(--rule); }
+#evidence h2 { font: 600 24px var(--serif); margin: 0 0 6px; }
+#evidence p { font: 400 16px/1.55 var(--serif); color: var(--muted); max-width: 64ch; }
+#evidence .final { color: var(--ink); font-weight: 600; font-size: 20px; }
+#evidence .support { font-size: 14px; }
+@media (max-width: 560px) {
+  h1 { font-size: 32px; } .nums .small { font-size: 64px; } .nums .huge { font-size: 120px; } .thesis { font-size: 24px; }
+}
 .hidden { display: none; }
-footer { margin-top: 30px; color: var(--muted); font-size: 13px; line-height: 1.6; }
-footer a, #evidence a { color: var(--accent); }
+footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--rule); font: 400 14px/1.6 var(--serif); color: var(--muted); }
+footer a, #evidence a { color: var(--ink); }
+code { font-family: var(--mono); font-size: .9em; }
 </style>
 </head>
 <body>
 <main>
-  <div class="kicker">AgentSeism · Regression Explorer</div>
+  <div class="fig">AgentSeism · Fig. 1 · Regression explorer</div>
   <h1>What the average hides</h1>
-  <p class="lede">An agent is stochastic: run it twice and some tasks come out differently. Each square below is one run.
+  <p class="lede">An agent is stochastic: run it twice and some tasks come out differently. Below, every mark is one run.
     Pick a pull request and play it.</p>
   <div class="tabs" role="tablist" id="tabs"></div>
 
-  <div class="caption" id="caption" aria-live="polite"></div>
+  <p class="caption" id="caption" aria-live="polite"></p>
   <p class="sub" id="sub"></p>
   <div class="controls">
-    <button class="primary" id="play">▶ Play the PR</button>
-    <button id="reset">↺ Reset</button>
+    <button id="play">▶ Play the pull request</button>
+    <button id="reset" class="quiet">Reset</button>
   </div>
 
-  <svg id="bars" role="img" aria-label="One bar per capability: runs on main and on this PR"></svg>
+  <svg id="bars" role="img" aria-label="Each capability's runs on main and on this pull request"></svg>
+  <svg id="trace" role="img" aria-label="Seismic trace: small tremors for ordinary variation, a fall for a collapse"></svg>
+  <p class="traceNote" id="traceNote"></p>
 
-  <section id="versus" class="hidden" aria-live="polite">
+  <section id="climax" class="hidden" aria-live="polite">
+    <div class="nums" id="nums"></div>
     <p class="thesis" id="thesis"></p>
-    <svg id="vbars" role="img" aria-label="Overall and the collapsed capability on the same scale"></svg>
+    <svg id="rules" role="img" aria-label="Task success on main and on the pull request, same scale"></svg>
   </section>
 
-  <section id="decision" class="hidden" aria-live="polite"></section>
-
+  <section id="conclusion" class="hidden" aria-live="polite"></section>
   <section id="evidence" class="hidden" aria-live="polite"></section>
 
   <footer>
-    <p><b>What this is.</b> These are the three <code>seism demo</code> scenarios. Every run's outcome is written out in the scenario,
-      not drawn at random, and every number and verdict on this page comes from AgentSeism's own decision engine. It shows how
-      the check reasons. It is not evidence that the check works. For that, see the
-      <a href="https://github.com/lyr-ai/agentseism/blob/master/analysis/ci_v1/stageC/RESULTS.md">pre-registered real-agent study</a> and the
-      <a href="https://github.com/lyr-ai/agentseism-example/pulls">two public example PRs</a>.</p>
-    <p><a href="https://github.com/lyr-ai/agentseism">github.com/lyr-ai/agentseism</a> ·
-      <a href="/why-agent-ci-cant-be-treated-like-deterministic-tests/">Why agent CI can't be treated like deterministic tests</a></p>
+    <b>What this is.</b> These are the three <code>seism demo</code> scenarios. Every run's outcome is written out in the scenario, not
+    drawn at random, and every number and verdict here comes from AgentSeism's own decision engine. The trace is drawn from the
+    same runs. It shows how the check reasons. It is not evidence that it works. For that, see the
+    <a href="https://github.com/lyr-ai/agentseism/blob/master/analysis/ci_v1/stageC/RESULTS.md">pre-registered real-agent study</a> and the
+    <a href="https://github.com/lyr-ai/agentseism-example/pulls">two public example PRs</a>.<br>
+    <a href="https://github.com/lyr-ai/agentseism">github.com/lyr-ai/agentseism</a> ·
+    <a href="/why-agent-ci-cant-be-treated-like-deterministic-tests/">Why agent CI can't be treated like deterministic tests</a>
   </footer>
 </main>
 
@@ -108,219 +123,256 @@ footer a, #evidence a { color: var(--accent); }
   const D = window.EXPLORER_DATA;
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const q = new URLSearchParams(location.search);
   const count = s => s.split("1").length - 1;
   const pct = x => `${Math.round(x * 100)}%`;
-  const signed = v => `${v >= 0 ? "+" : "−"}${Math.abs(Math.round(v))}`;
+  const neg = v => `${v < 0 ? "−" : v > 0 ? "+" : ""}${Math.abs(Math.round(v))}`;       // a real minus sign
   const short = n => n.split("-")[0];
   const TAB = { noise: "Unchanged candidate", collapse: "One capability collapses", insufficient: "Too little evidence" };
+  const REST = q.get("rest") === "full" ? 1 : 0.5;
   let cur = 1, played = false, tl = null, G = {};
 
-  // ── the words for each act, per scenario ─────────────────────────────
+  // ── the words of each act ────────────────────────────────────────────
   function story(s) {
     const hero = s.tasks.find(t => t.gate === "FIRED") || null;
     const o = Math.round((s.score.candidate - s.score.baseline) * 100);
     const w = { hero, o, a1: `${s.tasks.length} capabilities, ${s.trials} runs each, on main.`,
-                a1s: "Each square is one run. Filled means the agent succeeded." };
-    if (hero) return { ...w,
-      a2: "The PR runs.", a2s: "",
-      a2b: `${short(hero.name)} empties. The rest barely move.`, a2bs: "Everything else steps back so you can see it.",
-      thesis: `The average fell ${-o} points. <span class="hot">One capability disappeared.</span>` };
-    if (s.key === "insufficient") return { ...w,
-      a2: "The PR runs.", a2s: "",
-      a2b: "The score dropped, but look how little there is.", a2bs: `${s.tasks.length} tasks, ${s.trials} runs each.`,
-      thesis: `The average fell ${-o} points, on six runs. That's too little to call.` };
-    return { ...w,
-      a2: "The PR runs.", a2s: "",
-      a2b: "Nothing changed, and the scores still moved.", a2bs: "A few runs flipped, both ways: ordinary run-to-run noise.",
-      thesis: `The average moved ${Math.abs(o)} points. No capability collapsed.` };
+                a1s: "A standing mark is a run that succeeded; a dot on the floor, one that failed." };
+    if (hero) return { ...w, a2: "The pull request runs.", a2s: "Most capabilities only tremble.",
+      a3: `<em>${hero.name}</em> falls. The rest barely move.`, a3s: "Small tremors are normal. This is a structural fall.",
+      thesis: `The average fell ${-o} points.<br><em>One capability disappeared.</em>` };
+    if (s.key === "insufficient") return { ...w, a2: "The pull request runs.", a2s: "The score dips, on very few runs.",
+      a3: "Too little to read a signal.", a3s: `${s.tasks.length} tasks, ${s.trials} runs each: the instrument can't tell tremor from fall.`,
+      thesis: `The average fell ${-o} points, on six runs.<br><em>Not enough to call either way.</em>` };
+    return { ...w, a2: "The pull request runs.", a2s: "Nothing in the agent changed.",
+      a3: "Only tremors.", a3s: "A few runs flipped, both ways: ordinary run-to-run noise.",
+      thesis: `The average moved ${Math.abs(o)} points.<br>No capability fell.` };
   }
 
-  // ── tabs ─────────────────────────────────────────────────────────────
   const tabs = d3.select("#tabs").selectAll("button").data(D.scenarios).join("button").attr("role", "tab")
     .text(s => TAB[s.key]).on("click", (_, s) => { cur = D.scenarios.indexOf(s); render(); });
 
-  // ── the capability bars ──────────────────────────────────────────────
+  // ── the measurement plate: a standing mark per success, a dot per failure ─
   const svg = d3.select("#bars");
   function geometry(s) {
-    const c = (document.querySelector("main").clientWidth - 40) < 560;
-    const g = c ? { NAME: 74, CELL: 13, GAP: 2, ROW: 32, FS: 12, ARROW: 30, TAG: 70 }
-                : { NAME: 150, CELL: 22, GAP: 3, ROW: 42, FS: 15, ARROW: 56, TAG: 120 };
+    const c = (document.querySelector("main").clientWidth - 44) < 560;
+    const g = c ? { NAME: 72, STEP: 10, TALL: 14, ROW: 30, FS: 12, GAP: 34, TAG: 76 }
+                : { NAME: 160, STEP: 15, TALL: 20, ROW: 38, FS: 14, GAP: 70, TAG: 120 };
     g.compact = c;
-    g.BAR = s.trials * (g.CELL + g.GAP);
-    const col = Math.max(g.BAR, 90) + 40;
-    g.mainX = g.NAME; g.prX = g.NAME + col + g.ARROW;
-    g.width = g.prX + col + g.TAG;
-    g.height = 26 + s.tasks.length * g.ROW;
+    g.BAR = s.trials * g.STEP;
+    const col = Math.max(g.BAR, 80) + 36;
+    g.mainX = g.NAME; g.prX = g.NAME + col + g.GAP;
+    g.width = g.prX + col + g.TAG; g.height = 26 + s.tasks.length * g.ROW;
     return g;
   }
-  function drawBars(s) {
+  const floorY = r => 24 + r * G.ROW + G.TALL + 4;
+  function mark(g, x, r, ok, cls, colour) {
+    const y = floorY(r), m = g.append("g").attr("class", cls);
+    m.append("line").attr("x1", x).attr("x2", x).attr("y1", ok ? y - G.TALL : y).attr("y2", y)
+      .attr("stroke", colour).attr("stroke-width", G.compact ? 1.8 : 2.2).attr("stroke-linecap", "round");
+    m.append("circle").attr("cx", x).attr("cy", y).attr("r", ok ? 0 : 2.3).attr("fill", css("--muted"));
+    return m;
+  }
+  function drawPlate(s) {
     G = geometry(s);
     svg.attr("viewBox", `0 0 ${G.width} ${G.height}`).attr("width", "100%").style("max-width", `${G.width * 1.1}px`).selectAll("*").remove();
-    svg.append("text").attr("x", G.mainX).attr("y", 14).attr("font-size", G.FS - 3).attr("fill", css("--muted")).text("MAIN");
-    svg.append("text").attr("class", "prlabel").attr("x", G.prX).attr("y", 14).attr("font-size", G.FS - 3).attr("fill", css("--muted")).attr("opacity", 0).text("THIS PR");
+    const head = (x, t, cls) => svg.append("text").attr("class", cls || "").attr("x", x).attr("y", 12).attr("font-family", css("--mono"))
+      .attr("font-size", G.FS - 4).attr("letter-spacing", ".12em").attr("fill", css("--muted")).text(t);
+    head(G.mainX, "○ MAIN"); head(G.prX, "● THIS PR", "prhead").attr("opacity", 0);
     s.tasks.forEach((t, r) => {
       const y = 24 + r * G.ROW;
       const g = svg.append("g").attr("class", "cap").attr("data-task", t.name).on("click", () => drill(s, t));
-      g.append("rect").attr("x", 0).attr("y", y - 4).attr("width", G.width).attr("height", G.ROW - 4).attr("fill", "transparent");
-      g.append("text").attr("class", "name").attr("x", 4).attr("y", y + G.CELL * 0.8).attr("font-size", G.FS)
-        .attr("font-family", css("--mono")).attr("fill", css("--text")).text(G.compact ? short(t.name) : t.name)
-        .append("title").text(`${t.name}: click to see its runs`);
-      [...t.baseline].forEach((o, i) => g.append("rect").attr("x", G.mainX + i * (G.CELL + G.GAP)).attr("y", y)
-        .attr("width", G.CELL).attr("height", G.CELL).attr("rx", 3).attr("fill", o === "1" ? css("--green") : css("--faint")));
-      g.append("text").attr("x", G.mainX + G.BAR + 8).attr("y", y + G.CELL * 0.8).attr("font-size", G.FS - 2)
-        .attr("font-family", css("--mono")).attr("fill", css("--muted")).text(`${count(t.baseline)}/${s.trials}`);
-      const pr = g.append("g").attr("class", "pr").attr("opacity", 0);
-      pr.append("text").attr("x", G.prX - G.ARROW + 8).attr("y", y + G.CELL * 0.8).attr("font-size", G.FS).attr("fill", css("--muted")).text("→");
-      [...t.candidate].forEach((o, i) => pr.append("rect").attr("class", "p").attr("data-i", i)
-        .attr("x", G.prX + i * (G.CELL + G.GAP)).attr("y", y).attr("width", G.CELL).attr("height", G.CELL).attr("rx", 3)
-        .attr("fill", css("--faint")));
-      pr.append("text").attr("class", "pc").attr("x", G.prX + G.BAR + 8).attr("y", y + G.CELL * 0.8).attr("font-size", G.FS - 2)
+      g.append("rect").attr("class", "wash").attr("x", 0).attr("y", y - 6).attr("width", G.width).attr("height", G.ROW - 2).attr("fill", "transparent");
+      g.append("text").attr("class", "name").attr("x", 0).attr("y", floorY(r)).attr("font-size", G.FS).attr("font-family", css("--mono"))
+        .attr("fill", css("--ink")).text(G.compact ? short(t.name) : t.name).append("title").text(`${t.name}: click to see its runs`);
+      g.append("line").attr("x1", G.mainX - 4).attr("x2", G.mainX + G.BAR).attr("y1", floorY(r) + 0.5).attr("y2", floorY(r) + 0.5).attr("stroke", css("--rule"));
+      [...t.baseline].forEach((o, i) => mark(g, G.mainX + i * G.STEP + 3, r, o === "1", "m", css("--sage")));
+      g.append("text").attr("x", G.mainX + G.BAR + 10).attr("y", floorY(r)).attr("font-size", G.FS - 2).attr("font-family", css("--mono"))
+        .attr("fill", css("--muted")).text(`${count(t.baseline)}/${s.trials}`);
+      const pr = g.append("g").attr("class", "pr");
+      pr.append("line").attr("x1", G.prX - 4).attr("x2", G.prX + G.BAR).attr("y1", floorY(r) + 0.5).attr("y2", floorY(r) + 0.5)
+        .attr("stroke", css("--rule")).attr("stroke-dasharray", "2 3");
+      const runs = pr.append("g").attr("class", "runs").attr("opacity", 0);
+      // every PR run starts standing: the candidate hasn't told us anything yet
+      [...t.candidate].forEach((o, i) => mark(runs, G.prX + i * G.STEP + 3, r, true, "p", css("--sage")).attr("data-i", i));
+      pr.append("text").attr("class", "pc").attr("x", G.prX + G.BAR + 10).attr("y", floorY(r)).attr("font-size", G.FS - 2)
         .attr("font-family", css("--mono")).attr("fill", css("--muted")).text("");
-      pr.append("text").attr("class", "tag").attr("x", G.prX + G.BAR + (G.compact ? 38 : 48)).attr("y", y + G.CELL * 0.8)
-        .attr("font-size", G.FS - 3).attr("font-weight", 800).attr("letter-spacing", ".06em").attr("fill", css("--red")).text("");
+      pr.append("text").attr("class", "tag").attr("x", G.prX + G.BAR + (G.compact ? 36 : 46)).attr("y", floorY(r))
+        .attr("font-size", G.FS - 1).attr("font-family", css("--serif")).attr("font-style", "italic").attr("fill", css("--cinnabar")).text("");
     });
   }
-  // one PR cell's final look: success is filled; a collapsed capability's
-  // failures are *empty* (the capability is gone), ordinary failures are faint
-  function cellEnd(t, i) {
+  // where a PR run ends: standing, or fallen (a cinnabar dot if the capability collapsed)
+  function settle(el, t, i, animate, at) {
     const ok = t.candidate[i] === "1", hero = t.gate === "FIRED";
-    return ok ? { fill: css("--green"), stroke: "none" }
-      : hero ? { fill: css("--panel"), stroke: css("--border") } : { fill: css("--faint"), stroke: "none" };
+    const line = el.querySelector("line"), dot = el.querySelector("circle");
+    const top = +line.getAttribute("y2") - (ok ? G.TALL : 0), col = hero && !ok ? css("--cinnabar") : css("--muted");
+    if (!animate) { d3.select(line).attr("y1", top); d3.select(dot).attr("r", ok ? 0 : (hero ? 3 : 2.3)).attr("fill", col); return; }
+    tl.to(line, { attr: { y1: top }, duration: ok ? 0.2 : (hero ? 0.32 : 0.18), ease: ok ? "power2.out" : "power3.in" }, at);
+    if (!ok) tl.to(dot, { attr: { r: hero ? 3 : 2.3 }, fill: col, duration: 0.12 }, at + (hero ? 0.28 : 0.15));
   }
 
-  // ── overall vs the collapsed capability, on one scale ────────────────
-  function drawVersus(s, w, final) {
-    const hero = w.hero, L = G.compact ? 200 : 460, x0 = G.compact ? 84 : 130, W = x0 + L + (G.compact ? 150 : 210);
-    const H = hero ? 128 : 60;
-    const v = d3.select("#vbars").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").style("max-width", `${W * 1.1}px`);
-    v.selectAll("*").remove();
-    const pair = (y, label, a, b, hot) => {
-      const delta = Math.round((b - a) * 100);
-      v.append("text").attr("x", 4).attr("y", y + 17).attr("font-size", G.FS).attr("font-weight", 700).attr("font-family", css("--mono"))
-        .attr("fill", hot ? css("--red") : css("--text")).text(label);
-      v.append("rect").attr("x", x0).attr("y", y + 4).attr("width", L).attr("height", 16).attr("rx", 8).attr("fill", css("--faint"));
-      v.append("rect").attr("class", "solid").attr("data-to", b).attr("data-l", L).attr("x", x0).attr("y", y + 4)
-        .attr("width", Math.max(0, L * (final ? b : a))).attr("height", 16).attr("rx", 8).attr("fill", hot ? css("--red") : css("--green"));
-      v.append("text").attr("x", x0).attr("y", y + 38).attr("font-size", G.FS - 3).attr("font-family", css("--mono")).attr("fill", css("--muted"))
-        .text(`${pct(a)} → ${pct(b)}`);
-      v.append("text").attr("class", "delta").attr("data-to", delta).attr("x", x0 + L + 14).attr("y", y + 20)
-        .attr("font-size", G.compact ? 20 : 30).attr("font-weight", 800).attr("font-family", css("--mono"))
-        .attr("fill", hot ? css("--red") : css("--text")).text(final ? `${signed(delta)} pts` : "0 pts");
-    };
-    pair(2, "overall", s.score.baseline, s.score.candidate, false);
-    if (hero) pair(66, G.compact ? short(hero.name) : hero.name, count(hero.baseline) / s.trials, count(hero.candidate) / s.trials, true);
+  // ── the seismic trace, from the runs themselves ──────────────────────
+  // tremor = each run's deviation from its task's mean on main; the collapsed capability,
+  // read last, falls by its actual change, to scale, and stays down
+  const tr = d3.select("#trace");
+  function tracePoints(s, W, y0, amp, fall) {
+    const hero = s.tasks.find(t => t.gate === "FIRED");
+    const order = hero ? [...s.tasks.filter(t => t !== hero), hero] : s.tasks;
+    const per = order.length * s.trials + (hero ? 8 : 2), dx = (W - 20) / per, pts = [];
+    let x = 10;
+    order.forEach(t => {
+      const m = count(t.baseline) / s.trials, src = hero && t === hero ? t.baseline : t.candidate;
+      [...src].forEach(o => { pts.push([x, y0 - ((o === "1" ? 1 : 0) - m) * amp]); x += dx; });
+    });
+    const cut = pts.length;
+    const change = hero ? (count(hero.candidate) - count(hero.baseline)) / s.trials : 0;
+    for (let k = 0; k < (hero ? 8 : 2); k++) { pts.push([x, y0 - change * fall * Math.min(1, (k + 1) / 1.6)]); x += dx; }
+    return { pts, cut, hero };
+  }
+  function drawTrace(s, stage) {
+    const W = G.width, H = G.compact ? 70 : 96, y0 = G.compact ? 22 : 28, amp = G.compact ? 7 : 10, fall = G.compact ? 38 : 58;
+    tr.attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").style("max-width", `${W * 1.1}px`).selectAll("*").remove();
+    tr.append("line").attr("x1", 10).attr("x2", W - 10).attr("y1", y0).attr("y2", y0).attr("stroke", css("--rule")).attr("stroke-dasharray", "1 4");
+    const { pts, cut, hero } = tracePoints(s, W, y0, amp, fall);
+    const line = d3.line().curve(d3.curveMonotoneX);
+    const a = tr.append("path").attr("class", "tremor").attr("d", line(pts.slice(0, cut + 1))).attr("fill", "none")
+      .attr("stroke", css("--ink")).attr("stroke-width", 1.1).attr("opacity", 0.8);
+    const b = tr.append("path").attr("class", "rupture").attr("d", line(pts.slice(cut))).attr("fill", "none")
+      .attr("stroke", hero ? css("--cinnabar") : css("--ink")).attr("stroke-width", hero ? 2 : 1.1);
+    [a, b].forEach(p => { const L = p.node().getTotalLength(); p.attr("stroke-dasharray", `${L} ${L}`).attr("data-l", L)
+      .attr("stroke-dashoffset", stage === "full" ? 0 : stage === "tremor" && p === a ? 0 : L); });
+    return { a, b };
+  }
+
+  // ── the climax (Act 3): the gap, oversized ───────────────────────────
+  function drawClimax(s, w, final) {
+    const hero = w.hero;
+    const h = hero ? Math.round((count(hero.candidate) - count(hero.baseline)) / s.trials * 100) : null;
+    d3.select("#nums").html(`
+      <div><div class="small" data-to="${w.o}">${final ? neg(w.o) : "0"}</div><div class="k">the average</div></div>
+      ${hero ? `<div class="hot"><div class="huge" data-to="${h}">${final ? neg(h) : "0"}</div><div class="k">${hero.name}</div></div>` : ""}`);
     d3.select("#thesis").html(w.thesis);
+    // the same scale for both, ○ main → ● this PR
+    const W = G.compact ? 420 : 820, x0 = G.compact ? 90 : 150, x = d3.scaleLinear().domain([0, 100]).range([x0, W - 30]);
+    const rows = [["overall", Math.round(s.score.baseline * 100), Math.round(s.score.candidate * 100), false]];
+    if (hero) rows.push([G.compact ? short(hero.name) : hero.name, Math.round(count(hero.baseline) / s.trials * 100), Math.round(count(hero.candidate) / s.trials * 100), true]);
+    const H = 30 + rows.length * 50, v = d3.select("#rules").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").style("max-width", `${W * 1.1}px`);
+    v.selectAll("*").remove();
+    rows.forEach(([label, a, b, hot], k) => {
+      const y = 30 + k * 50, col = hot ? css("--cinnabar") : css("--sage");
+      v.append("text").attr("x", 0).attr("y", y + 4).attr("font-family", css("--mono")).attr("font-size", G.FS - 1).attr("fill", hot ? css("--cinnabar") : css("--ink")).text(label);
+      v.append("line").attr("x1", x(0)).attr("x2", x(100)).attr("y1", y).attr("y2", y).attr("stroke", css("--rule"));
+      [0, 25, 50, 75, 100].forEach(t => v.append("line").attr("x1", x(t)).attr("x2", x(t)).attr("y1", y - 3).attr("y2", y + 3).attr("stroke", css("--rule")));
+      v.append("line").attr("x1", x(a)).attr("x2", x(b)).attr("y1", y).attr("y2", y).attr("stroke", col).attr("stroke-width", 1.8);
+      v.append("circle").attr("cx", x(a)).attr("cy", y).attr("r", 5).attr("fill", css("--paper")).attr("stroke", col).attr("stroke-width", 1.5);
+      v.append("circle").attr("cx", x(b)).attr("cy", y).attr("r", 5).attr("fill", col);
+      v.append("text").attr("x", x(a)).attr("y", y - 11).attr("text-anchor", "middle").attr("font-family", css("--mono")).attr("font-size", 10).attr("fill", css("--muted")).text(`${a}%`);
+      v.append("text").attr("x", x(b)).attr("y", y - 11).attr("text-anchor", "middle").attr("font-family", css("--mono")).attr("font-size", 10).attr("fill", css("--muted")).text(`${b}%`);
+    });
   }
 
-  // ── the decision, last ───────────────────────────────────────────────
-  const LABEL = { PASS: "✓ PASS", REGRESSION: "✕ REGRESSION", INSUFFICIENT_EVIDENCE: "? NEED EVIDENCE", "INSUFFICIENT EVIDENCE": "? NEED EVIDENCE" };
-  const PILL = { PASS: "PASS", REGRESSION: "REGRESSION", INSUFFICIENT_EVIDENCE: "INSUFFICIENT", "INSUFFICIENT EVIDENCE": "INSUFFICIENT" };
-  function drawDecision(s, w) {
-    const c = s.capability, capState = c.fired.length ? "REGRESSION" : c.eligible.length ? "PASS" : "NOT MONITORED";
-    const line = s.verdict === "REGRESSION" && s.broad.status === "PASS"
-      ? "The broad check saw a modest drop across the suite. The capability check saw one task stop working. Either one fails the PR."
-      : s.verdict === "PASS" ? "No material regression found. The check is green."
-      : "Too little evidence to decide. The check fails until there are more runs or tasks, and it is not a regression.";
-    d3.select("#decision").html(`
-      <div class="gates">
-        <span>Broad reliability<span class="pill ${PILL[s.broad.status]}">${LABEL[s.broad.status]}</span></span>
-        <span>Capability regression<span class="pill ${capState === "NOT MONITORED" ? "NOTMON" : PILL[capState]}">${capState === "NOT MONITORED" ? "NOT MONITORED" : LABEL[capState]}</span></span>
-        <span class="verdict">AgentSeism <span class="pill ${PILL[s.verdict]}" style="font-size:15px">${LABEL[s.verdict]}</span></span>
+  // ── the conclusion (Act 4), written like one ─────────────────────────
+  function drawConclusion(s, w) {
+    const c = s.capability, capState = c.fired.length ? "fail" : c.eligible.length ? "pass" : "none";
+    const broad = { PASS: ["pass", "✓ pass: no suite-wide drop cleared −10 points"], REGRESSION: ["fail", "✕ regression: the suite is confidently worse"],
+                    "INSUFFICIENT EVIDENCE": ["wait", "? cannot tell: too few tasks or runs"] }[s.broad.status];
+    const capTxt = { fail: `✕ regression: ${c.fired.join(", ")} stopped working`, pass: "✓ pass: no reliable capability collapsed",
+                     none: `not monitored: needs ${c.min_trials} runs per task` }[capState];
+    const verdict = { PASS: ["pass", "PASS", "No material regression. The check is green."],
+                      REGRESSION: ["fail", "REGRESSION", "This pull request made the agent worse. The check fails."],
+                      INSUFFICIENT_EVIDENCE: ["wait", "INSUFFICIENT EVIDENCE", "Not a pass, and not a regression. The check fails until there is more evidence."] }[s.verdict];
+    const why = s.verdict === "REGRESSION" && s.broad.status === "PASS"
+      ? "The broad test read the suite and saw a modest drop. The capability test read each task and saw one stop working. Either finding fails the pull request." : "";
+    d3.select("#conclusion").html(`
+      <div class="fig" style="margin-bottom:10px">Conclusion</div>
+      <div class="concl">
+        <span class="g">Broad reliability</span><span class="mark-${broad[0]}">${broad[1]}</span>
+        <span class="g">Capability regression</span><span class="mark-${capState === "pass" ? "pass" : capState === "fail" ? "fail" : "none"}">${capTxt}</span>
       </div>
-      <p class="decline">${line}</p>
-      <div class="links">
+      <p class="verdictline">AgentSeism: <span class="mark-${verdict[0]}">${verdict[1]}</span></p>
+      <p class="explain">${verdict[2]} ${why}</p>
+      <div class="more">
         ${w.hero ? `<button id="go-hero">See ${w.hero.name}'s runs ↓</button>` : ""}
-        <button id="go-broad">Why did the broad check ${s.broad.status === "PASS" ? "pass" : s.broad.status === "REGRESSION" ? "fire" : "abstain"}? ↓</button>
+        <button id="go-broad">Why did the broad test ${s.broad.status === "PASS" ? "pass" : s.broad.status === "REGRESSION" ? "fire" : "abstain"}? ↓</button>
       </div>`);
     d3.select("#go-hero").on("click", () => drill(s, w.hero));
     d3.select("#go-broad").on("click", () => showBroad(s));
   }
 
-  // ── play, about five seconds: main → the PR → one empties → the gap → the decision
+  // ── play: observe → tremor → rupture → interpret ─────────────────────
   function play() {
     const s = D.scenarios[cur], w = story(s), hero = w.hero;
     reset(false);
     const T = reduce ? 0 : 1;
     tl = gsap.timeline();
-    const say = (at, a, b) => tl.call(() => { d3.select("#caption").text(a); d3.select("#sub").text(b); }, null, at);
-    // 0–1 s: main, as it is
-    // 1–2 s: the PR column grows in; everything settles quickly (the hero looks fine for now)
-    say(0.6 * T, w.a2, w.a2s);
-    tl.to(svg.select("text.prlabel").node(), { opacity: 1, duration: 0.3 * T }, 0.6 * T);
+    const say = (at, a, b) => tl.call(() => { d3.select("#caption").html(a); d3.select("#sub").text(b); }, null, at);
+    const { a: tremor, b: rupture } = drawTrace(s, "none");
+    // tremor: the PR runs; ordinary runs settle quickly; the trace draws its small tremors
+    say(0.5 * T, w.a2, w.a2s);
+    tl.to(svg.select("text.prhead").node(), { opacity: 1, duration: 0.3 * T }, 0.5 * T);
+    tl.to(tremor.node(), { attr: { "stroke-dashoffset": 0 }, duration: 1.6 * T, ease: "none" }, 0.6 * T);
+    tl.call(() => d3.select("#traceNote").text("trace: each run's deviation from its task's average on main"), null, 0.6 * T);
     s.tasks.forEach((t, r) => {
       const g = svg.select(`g.cap[data-task="${t.name}"]`);
-      tl.to(g.select("g.pr").node(), { opacity: 1, duration: 0.3 * T }, (0.7 + 0.04 * r) * T);
-      g.selectAll("rect.p").each(function () {
-        const i = +this.dataset.i, e = t === hero ? { fill: css("--green") } : cellEnd(t, i);
-        tl.to(this, { attr: { fill: e.fill }, stroke: e.stroke || "none", duration: 0.25 * T }, (0.8 + 0.04 * r + 0.03 * i) * T);
-      });
-      if (t !== hero) tl.call(() => g.select("text.pc").text(`${count(t.candidate)}/${s.trials}`), null, 1.5 * T);
+      tl.to(g.select("g.runs").node(), { opacity: 1, duration: 0.25 * T }, (0.6 + 0.05 * r) * T);
+      if (t === hero) return;
+      g.selectAll("g.p").each(function () { settle(this, t, +this.dataset.i, !reduce, (0.8 + 0.05 * r + 0.02 * +this.dataset.i) * T); });
+      tl.call(() => g.select("text.pc").text(`${count(t.candidate)}/${s.trials}`), null, 1.4 * T);
     });
-    let t2 = 2.0 * T;
+    let t2 = 2.2 * T;
     if (hero) {
-      // 2–3 s: the others step back; the hero empties, one run at a time
-      say(t2, w.a2b, w.a2bs);
-      s.tasks.forEach(t => { if (t !== hero) tl.to(svg.select(`g.cap[data-task="${t.name}"]`).node(), { opacity: 0.2, duration: 0.35 * T }, t2); });
-      const g = svg.select(`g.cap[data-task="${hero.name}"]`);
-      tl.call(() => g.select("text.name").attr("font-weight", 700), null, t2);
-      const n = s.trials, cells = g.selectAll("rect.p").nodes();
-      cells.forEach((c, i) => {
-        const e = cellEnd(hero, +c.dataset.i), at = t2 + (0.25 + 0.09 * i) * T;
-        tl.to(c, { attr: { fill: e.fill }, stroke: e.stroke, strokeWidth: 1.2, duration: 0.12 * T, ease: "power2.in" }, at);
-        tl.call(() => g.select("text.pc").text(`${n - i - 1}/${n}`).attr("fill", css("--red")).attr("font-weight", 800), null, at + 0.1 * T);
+      // rupture: everything else steps back; the hero's runs fall, one after another; the trace falls with them
+      say(t2, w.a3, w.a3s);
+      s.tasks.forEach(t => { if (t !== hero) tl.to(svg.select(`g.cap[data-task="${t.name}"]`).node(), { opacity: 0.22, duration: 0.35 * T }, t2); });
+      const g = svg.select(`g.cap[data-task="${hero.name}"]`), n = s.trials;
+      tl.call(() => g.select("text.name").attr("font-weight", 600).attr("fill", css("--cinnabar")), null, t2);
+      g.selectAll("g.p").nodes().forEach((el, i) => {
+        const at = t2 + (0.3 + 0.1 * i) * T;
+        settle(el, hero, +el.dataset.i, !reduce, at);
+        tl.call(() => g.select("text.pc").text(`${n - i - 1}/${n}`).attr("fill", css("--cinnabar")).attr("font-weight", 600), null, at + 0.25 * T);
       });
-      tl.call(() => g.select("text.tag").text("COLLAPSED"), null, t2 + (0.3 + 0.09 * n) * T);
-      t2 += 1.2 * T;
+      tl.to(rupture.node(), { attr: { "stroke-dashoffset": 0 }, duration: 0.7 * T, ease: "power3.in" }, t2 + 0.5 * T);
+      tl.call(() => { g.select("text.tag").text("structural fall"); d3.select("#traceNote").html(`trace: tremors are ordinary run-to-run variation; the fall is ${hero.name}, to scale`); }, null, t2 + (0.4 + 0.1 * n) * T);
+      t2 += (0.9 + 0.1 * n) * T;
     } else {
-      say(t2 - 0.4 * T, w.a2b, w.a2bs);
-      t2 += 0.2 * T;
+      say(t2 - 0.3 * T, w.a3, w.a3s);
+      tl.to(rupture.node(), { attr: { "stroke-dashoffset": 0 }, duration: 0.3 * T }, t2 - 0.3 * T);
+      t2 += 0.3 * T;
     }
-    // 3–4 s: the gap between the average and the capability, on one scale
-    tl.to(svg.selectAll("g.cap").nodes(), { opacity: hero ? 0.35 : 1, duration: 0.4 * T }, t2);
-    if (hero) tl.to(svg.select(`g.cap[data-task="${hero.name}"]`).node(), { opacity: 1, duration: 0.01 }, t2);
-    tl.call(() => { drawVersus(s, w, false); d3.select("#versus").classed("hidden", false).style("opacity", 0); }, null, t2);
-    tl.to("#versus", { opacity: 1, duration: 0.3 * T }, t2 + 0.01);
-    tl.call(() => {
-      d3.selectAll("#vbars rect.solid").each(function () {
-        gsap.to(this, { attr: { width: Math.max(0, +this.dataset.l * +this.dataset.to) }, duration: 0.8 * T, ease: "power2.inOut" });
-      });
-      d3.selectAll("#vbars text.delta").each(function () {
-        const o = { v: 0 }, to = +this.dataset.to, el = this;
-        gsap.to(o, { v: to, duration: 0.8 * T, ease: "power2.out", onUpdate: () => { el.textContent = `${signed(o.v)} pts`; } });
-      });
-    }, null, t2 + 0.1 * T);
-    // 4–5 s: the decision
-    const t3 = t2 + 1.7 * T;                      // hold the gap a beat: this is the moment it lands
-    tl.call(() => { drawDecision(s, w); d3.select("#decision").classed("hidden", false).style("opacity", 0); }, null, t3);
-    tl.to("#decision", { opacity: 1, duration: 0.5 * T }, t3 + 0.01);
-    tl.call(() => { played = true; }, null, t3 + 0.8 * T);
+    // the climax: the gap, oversized, and held
+    tl.call(() => { drawClimax(s, w, false); d3.select("#climax").classed("hidden", false).style("opacity", 0); }, null, t2);
+    tl.to("#climax", { opacity: 1, duration: 0.5 * T }, t2 + 0.01);
+    tl.call(() => d3.selectAll("#nums [data-to]").each(function () {
+      const o = { v: 0 }, to = +this.dataset.to, el = this;
+      gsap.to(o, { v: to, duration: 1.0 * T, ease: "power2.out", onUpdate: () => { el.textContent = neg(o.v); } });
+    }), null, t2 + 0.2 * T);
+    // interpret
+    const t3 = t2 + 2.2 * T;
+    tl.call(() => { drawConclusion(s, w); d3.select("#conclusion").classed("hidden", false).style("opacity", 0); }, null, t3);
+    tl.to("#conclusion", { opacity: 1, duration: 0.7 * T }, t3 + 0.01);
     if (hero) tl.to(svg.selectAll("g.cap").nodes().filter(n => n.dataset.task !== hero.name), { opacity: REST, duration: 0.6 * T }, t3);
+    tl.call(() => { played = true; }, null, t3 + 0.7 * T);
   }
 
-  // after the story, the other capabilities stay a step back so a still image keeps its focus;
-  // ?rest=full restores them, for comparison
-  const REST = new URLSearchParams(location.search).get("rest") === "full" ? 1 : 0.55;
-
-  // the end state, drawn directly (for ?final=1, resize, reduced motion)
+  // the end state, drawn directly (?final=1, resize, reduced motion)
   function finish(s) {
     const w = story(s);
     if (tl) tl.kill();
-    svg.select("text.prlabel").attr("opacity", 1);
+    svg.select("text.prhead").attr("opacity", 1);
     s.tasks.forEach(t => {
-      const g = svg.select(`g.cap[data-task="${t.name}"]`).style("opacity", w.hero && t !== w.hero ? REST : 1);
-      g.select("g.pr").attr("opacity", 1);
-      g.selectAll("rect.p").each(function () {
-        const e = cellEnd(t, +this.dataset.i);
-        d3.select(this).attr("fill", e.fill).attr("stroke", e.stroke).attr("stroke-width", 1.2);
-      });
-      const hot = t.gate === "FIRED";
-      g.select("text.pc").text(`${count(t.candidate)}/${s.trials}`).attr("fill", hot ? css("--red") : css("--muted")).attr("font-weight", hot ? 800 : 400);
-      g.select("text.tag").text(hot ? "COLLAPSED" : "");
-      g.select("text.name").attr("font-weight", hot ? 700 : 400);
+      const hot = t.gate === "FIRED", g = svg.select(`g.cap[data-task="${t.name}"]`).style("opacity", w.hero && !hot ? REST : 1);
+      g.select("g.runs").attr("opacity", 1);
+      g.selectAll("g.p").each(function () { settle(this, t, +this.dataset.i, false); });
+      g.select("text.pc").text(`${count(t.candidate)}/${s.trials}`).attr("fill", hot ? css("--cinnabar") : css("--muted")).attr("font-weight", hot ? 600 : 400);
+      g.select("text.tag").text(hot ? "structural fall" : "");
+      g.select("text.name").attr("fill", hot ? css("--cinnabar") : css("--ink")).attr("font-weight", hot ? 600 : 400);
     });
-    d3.select("#caption").text(w.a2b); d3.select("#sub").text(w.a2bs);
-    drawVersus(s, w, true); d3.select("#versus").classed("hidden", false).style("opacity", 1);
-    drawDecision(s, w); d3.select("#decision").classed("hidden", false).style("opacity", 1);
+    drawTrace(s, "full");
+    d3.select("#traceNote").html(w.hero ? `trace: tremors are ordinary run-to-run variation; the fall is ${w.hero.name}, to scale`
+                                        : "trace: each run's deviation from its task's average on main");
+    d3.select("#caption").html(w.a3); d3.select("#sub").text(w.a3s);
+    drawClimax(s, w, true); d3.select("#climax").classed("hidden", false).style("opacity", 1);
+    drawConclusion(s, w); d3.select("#conclusion").classed("hidden", false).style("opacity", 1);
     played = true;
   }
 
@@ -328,97 +380,95 @@ footer a, #evidence a { color: var(--accent); }
     const s = D.scenarios[cur], w = story(s);
     if (tl) tl.kill();
     played = false;
-    drawBars(s);
-    d3.select("#caption").text(w.a1); d3.select("#sub").text(w.a1s);
-    d3.selectAll("#versus, #decision").classed("hidden", true);
+    drawPlate(s); drawTrace(s, "none"); d3.select("#traceNote").text("");
+    d3.select("#caption").html(w.a1); d3.select("#sub").text(w.a1s);
+    d3.selectAll("#climax, #conclusion").classed("hidden", true);
     if (full) d3.select("#evidence").classed("hidden", true).html("");
   }
 
-  // ── drill-down: one capability's runs, falling one at a time ─────────
+  // ── drill-down: one capability, ○ main above, ● this PR falling one by one ─
   function drill(s, t, instant = false) {
-    const n = s.trials, b = count(t.baseline), a = count(t.candidate), c = s.capability;
+    const n = s.trials, b = count(t.baseline), a = count(t.candidate), c = s.capability, hot = t.gate === "FIRED";
     d3.select("#evidence").classed("hidden", false).html(`
-      <h2><code>${t.name}</code></h2>
-      <p>Each circle is one run: where it was on main (dashed), and where it landed on this PR.</p>
+      <div class="fig">Fig. 1a · ${t.name}</div>
+      <h2>${t.name}: every run, on main and on this pull request</h2>
+      <p>○ is where each run stood on main; ● is where it landed on this pull request.</p>
       <svg id="zoom" width="100%"></svg><p class="final" id="zfinal"></p><p id="zwhy"></p>`);
-    const W = 760, H = 232, x0 = 190, step = Math.min(62, 500 / n);
+    const W = 760, H = 220, x0 = 200, step = Math.min(60, 480 / n), top = 50, floor = 170;
     const z = d3.select("#zoom").attr("viewBox", `0 0 ${W} ${H}`).style("max-width", `${W}px`);
-    const band = (y, label, col) => {
-      z.append("rect").attr("x", 10).attr("y", y).attr("width", W - 20).attr("height", 62).attr("rx", 8).attr("fill", col);
-      z.append("text").attr("x", W - 26).attr("y", y + 37).attr("text-anchor", "end").attr("font-size", 12).attr("font-family", css("--mono")).attr("fill", css("--muted")).text(label);
-    };
-    band(10, "WORKING", css("--band")); band(160, "FAILED", css("--red-bg"));
-    const yOf = ok => ok ? 41 : 191;
-    const pc = z.append("text").attr("x", 24).attr("y", 128).attr("font-size", 28).attr("font-weight", 800).attr("font-family", css("--mono"))
-      .attr("fill", css("--text")).text(`${b}/${n}`);
-    z.append("text").attr("x", 24).attr("y", 146).attr("font-size", 12).attr("fill", css("--muted")).text("this PR, so far");
-    let live = b;
-    const moves = [];
+    [[top, "working"], [floor, "failed"]].forEach(([y, l]) => {
+      z.append("line").attr("x1", x0 - 30).attr("x2", W - 20).attr("y1", y).attr("y2", y).attr("stroke", css("--rule"));
+      z.append("text").attr("x", W - 20).attr("y", y - 8).attr("text-anchor", "end").attr("font-family", css("--serif")).attr("font-style", "italic")
+        .attr("font-size", 14).attr("fill", css("--muted")).text(l);
+    });
+    const yOf = ok => ok ? top : floor;
+    const pc = z.append("text").attr("x", 0).attr("y", 118).attr("font-family", css("--serif")).attr("font-size", 44).attr("fill", css("--ink")).text(`${b}/${n}`);
+    z.append("text").attr("x", 2).attr("y", 140).attr("font-family", css("--mono")).attr("font-size", 10).attr("letter-spacing", ".12em").attr("fill", css("--muted")).text("THIS PR, SO FAR");
+    let live = b; const moves = [];
     [...t.baseline].forEach((o, i) => {
       const x = x0 + i * step, was = o === "1", now = t.candidate[i] === "1";
-      z.append("circle").attr("cx", x).attr("cy", yOf(was)).attr("r", 11).attr("fill", "none").attr("stroke", css("--muted")).attr("stroke-dasharray", "3 3");
-      const d = z.append("circle").attr("cx", x).attr("cy", yOf(was)).attr("r", 11).attr("fill", was ? css("--green") : css("--muted"));
+      z.append("circle").attr("cx", x).attr("cy", yOf(was)).attr("r", 9).attr("fill", css("--paper")).attr("stroke", css("--sage")).attr("stroke-width", 1.4);
+      const d = z.append("circle").attr("cx", x).attr("cy", yOf(was)).attr("r", 6).attr("fill", was ? css("--sage") : css("--muted"));
       if (was !== now) moves.push({ d, now });
     });
     const done = () => {
-      pc.text(`${a}/${n}`).attr("fill", t.gate === "FIRED" ? css("--red") : css("--text"));
-      d3.select("#zfinal").text(t.gate === "FIRED" ? `${n} independent runs. Every one failed.` : `${a} of ${n} runs succeeded on this PR, against ${b} on main.`);
+      pc.text(`${a}/${n}`).attr("fill", hot ? css("--cinnabar") : css("--ink"));
+      d3.select("#zfinal").text(hot ? `${n} independent runs. Every one fell.` : `${a} of ${n} runs succeeded on this pull request, against ${b} on main.`);
     };
     moves.forEach(({ d, now }, k) => {
-      const land = () => { live += now ? 1 : -1; pc.text(`${live}/${n}`).attr("fill", live < b ? css("--red") : css("--text")); };
-      if (reduce || instant) { d.attr("cy", yOf(now)).attr("fill", now ? css("--green") : css("--red")); return; }
-      gsap.to(d.node(), { attr: { cy: yOf(now) }, fill: now ? css("--green") : css("--red"), duration: 0.45,
-        ease: now ? "power2.out" : "power3.in", delay: 0.3 + 0.28 * k, onComplete: land });
+      const land = () => { live += now ? 1 : -1; pc.text(`${live}/${n}`).attr("fill", live < b ? css("--cinnabar") : css("--ink")); };
+      const col = now ? css("--sage") : hot ? css("--cinnabar") : css("--muted");
+      if (reduce || instant) { d.attr("cy", yOf(now)).attr("fill", col); return; }
+      gsap.to(d.node(), { attr: { cy: yOf(now) }, fill: col, duration: 0.5, ease: now ? "power2.out" : "power3.in", delay: 0.3 + 0.28 * k, onComplete: land });
     });
-    if (reduce || instant || !moves.length) done();
-    else gsap.delayedCall(0.3 + 0.28 * moves.length + 0.5, done);
-    let why = t.gate === "FIRED" ? "It worked on every run on main and failed on every run of this PR: a capability that stopped working, not noise."
-      : t.gate === "WARNING" ? "A noticeable drop, flagged as a warning. The evidence isn't strong enough to block a merge on its own."
-      : t.gate === "PASS" ? "It held up: any change here is within this agent's usual run-to-run wobble."
+    if (reduce || instant || !moves.length) done(); else gsap.delayedCall(0.3 + 0.28 * moves.length + 0.5, done);
+    let why = hot ? "It worked on every run on main and failed on every run of this pull request: a capability that stopped working, not a tremor."
+      : t.gate === "WARNING" ? "A noticeable drop, flagged as a warning; not strong enough evidence to block a merge on its own."
+      : t.gate === "PASS" ? "It held: whatever moved here is within this agent's ordinary tremor."
       : (t.why_not_monitored ? t.why_not_monitored.charAt(0).toUpperCase() + t.why_not_monitored.slice(1) + "." : "");
-    if (t.p != null) why += ` <span style="font-size:13px">Supporting evidence: a drop of ${Math.round((b - a) / n * 100)} pts (the bar is ${Math.round(c.drop_threshold * 100)}); a one-sided exact test gives p = ${t.p.toFixed(4)}, against a per-task limit of ${c.limit.toFixed(4)} across ${c.k} tasks.</span>`;
+    if (t.p != null) why += ` <span class="support">Supporting evidence: a drop of ${Math.round((b - a) / n * 100)} points (the bar is ${Math.round(c.drop_threshold * 100)}); a one-sided exact test gives p = ${t.p.toFixed(4)}, against a per-task limit of ${c.limit.toFixed(4)} across ${c.k} tasks.</span>`;
     d3.select("#zwhy").html(why);
-    document.querySelector("#evidence").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    if (!instant) document.querySelector("#evidence").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   }
 
-  // ── the statistics layer: why the broad gate decided what it did ─────
+  // ── the statistics layer ─────────────────────────────────────────────
   function showBroad(s) {
     const b = s.broad;
-    d3.select("#evidence").classed("hidden", false).html(`<h2>Broad reliability: why it ${b.status === "PASS" ? "passed" : b.status === "REGRESSION" ? "fired" : "couldn't decide"}</h2>
-      <p>This check asks about the <b>suite</b>, so its unit of evidence is the task, not the run. Top: each task's change.
-      Bottom: ${b.boot_means.length.toLocaleString()} resampled averages, drawn by picking tasks with replacement. It blocks only if the
-      whole 95% band sits past the −${Math.round(b.threshold * 100)} pts line.</p>
+    d3.select("#evidence").classed("hidden", false).html(`<div class="fig">Fig. 1b · Broad reliability</div>
+      <h2>Why the broad test ${b.status === "PASS" ? "passed" : b.status === "REGRESSION" ? "fired" : "couldn't decide"}</h2>
+      <p>This test reads the <i>suite</i>, so its unit of evidence is the task, not the run. Above: each task's change. Below:
+      ${b.boot_means.length.toLocaleString()} resampled averages, drawn by picking tasks with replacement. It blocks only if the
+      whole 95% band lies past the −${Math.round(b.threshold * 100)}-point line.</p>
       <svg id="strip" width="100%" height="110"></svg><svg id="hist" width="100%" height="190"></svg><p id="bwhy"></p>`);
+    const axis = g => g.call(x => x.selectAll("text").attr("fill", css("--muted")).attr("font-family", css("--mono"))).call(x => x.selectAll("line,path").attr("stroke", css("--rule")));
     const w = document.querySelector("#strip").getBoundingClientRect().width || 700;
     const x = d3.scaleLinear().domain([-1.05, 0.3]).range([30, w - 20]);
     const st = d3.select("#strip");
-    st.append("g").attr("transform", "translate(0,82)").call(d3.axisBottom(x).ticks(6).tickFormat(v => `${Math.round(v * 100)}`))
-      .call(g => g.selectAll("text").attr("fill", css("--muted"))).call(g => g.selectAll("line,path").attr("stroke", css("--border")));
+    st.append("g").attr("transform", "translate(0,82)").call(d3.axisBottom(x).ticks(6).tickFormat(v => neg(v * 100))).call(axis);
     const stack = {};
     Object.entries(b.per_task).forEach(([k, v]) => {
       const name = k.split("/").pop().replace(".json", ""), key = Math.round(v * 100);
       stack[key] = (stack[key] || 0) + 1;
       const y = 70 - (stack[key] - 1) * 13;
-      st.append("circle").attr("cx", x(v)).attr("cy", y).attr("r", 5.5).attr("fill", v <= -0.5 ? css("--red") : v < 0 ? css("--amber") : css("--green")).append("title").text(`${name}: ${signed(v * 100)} pts`);
-      if (v <= -0.5) st.append("text").attr("x", x(v) + 9).attr("y", y + 4).attr("font-size", 12).attr("font-family", css("--mono")).attr("fill", css("--red")).text(name);
+      st.append("circle").attr("cx", x(v)).attr("cy", y).attr("r", 5).attr("fill", v <= -0.5 ? css("--cinnabar") : v < 0 ? css("--ochre") : css("--sage")).append("title").text(`${name}: ${neg(v * 100)} points`);
+      if (v <= -0.5) st.append("text").attr("x", x(v) + 9).attr("y", y + 4).attr("font-size", 13).attr("font-family", css("--serif")).attr("font-style", "italic").attr("fill", css("--cinnabar")).text(name);
     });
     const hw = document.querySelector("#hist").getBoundingClientRect().width || 700;
     const hx = d3.scaleLinear().domain([-0.65, 0.2]).range([30, hw - 20]);
     const bins = d3.bin().domain(hx.domain()).thresholds(hx.ticks(60))(b.boot_means);
     const hy = d3.scaleLinear().domain([0, d3.max(bins, d => d.length)]).range([150, 34]);
-    const h = d3.select("#hist"), col = b.status === "REGRESSION" ? css("--red") : b.status === "PASS" ? css("--green") : css("--amber");
+    const h = d3.select("#hist"), col = b.status === "REGRESSION" ? css("--cinnabar") : b.status === "PASS" ? css("--sage") : css("--ochre");
     h.append("rect").attr("x", hx(b.ci[0])).attr("width", Math.max(2, hx(b.ci[1]) - hx(b.ci[0]))).attr("y", 26).attr("height", 124).attr("fill", col).attr("opacity", 0.12);
     h.selectAll("rect.bar").data(bins).join("rect").attr("class", "bar").attr("x", d => hx(d.x0) + 0.5).attr("width", d => Math.max(0, hx(d.x1) - hx(d.x0) - 1))
-      .attr("y", d => hy(d.length)).attr("height", d => 150 - hy(d.length)).attr("fill", css("--muted")).attr("opacity", 0.55);
-    h.append("line").attr("x1", hx(-b.threshold)).attr("x2", hx(-b.threshold)).attr("y1", 18).attr("y2", 150).attr("stroke", css("--red")).attr("stroke-dasharray", "4 4");
-    h.append("text").attr("x", hx(-b.threshold) - 4).attr("y", 12).attr("text-anchor", "end").attr("font-size", 11).attr("fill", css("--red")).text(`block line −${Math.round(b.threshold * 100)} pts`);
-    h.append("text").attr("x", hx(b.ci[1]) + 4).attr("y", 12).attr("font-size", 11).attr("fill", col).text(`95% band ${signed(b.ci[0] * 100)} to ${signed(b.ci[1] * 100)} pts`);
-    h.append("g").attr("transform", "translate(0,150)").call(d3.axisBottom(hx).ticks(8).tickFormat(v => `${Math.round(v * 100)}`))
-      .call(g => g.selectAll("text").attr("fill", css("--muted"))).call(g => g.selectAll("line,path").attr("stroke", css("--border")));
+      .attr("y", d => hy(d.length)).attr("height", d => 150 - hy(d.length)).attr("fill", css("--ink")).attr("opacity", 0.45);
+    h.append("line").attr("x1", hx(-b.threshold)).attr("x2", hx(-b.threshold)).attr("y1", 18).attr("y2", 150).attr("stroke", css("--cinnabar")).attr("stroke-dasharray", "4 4");
+    h.append("text").attr("x", hx(-b.threshold) - 4).attr("y", 12).attr("text-anchor", "end").attr("font-size", 13).attr("font-family", css("--serif")).attr("font-style", "italic").attr("fill", css("--cinnabar")).text(`block line, −${Math.round(b.threshold * 100)} points`);
+    h.append("text").attr("x", hx(b.ci[1]) + 4).attr("y", 12).attr("font-size", 13).attr("font-family", css("--serif")).attr("font-style", "italic").attr("fill", col).text(`95% band, ${neg(b.ci[0] * 100)} to ${neg(b.ci[1] * 100)}`);
+    h.append("g").attr("transform", "translate(0,150)").call(d3.axisBottom(hx).ticks(8).tickFormat(v => neg(v * 100))).call(axis);
     d3.select("#bwhy").html(b.status === "PASS" && s.capability.fired.length
-      ? "The band reaches past the line on the left, but its right end stays short of it: resamples that leave out the collapsed task look almost unchanged. That is the average hiding one task, and it is why AgentSeism also judges each task directly."
+      ? "The band reaches past the line on the left, but its right end stays short of it: resamples that leave out the collapsed task look almost unchanged. That is the average hiding one task, and why AgentSeism also reads each task directly."
       : b.status === "PASS" ? "The band sits around zero. Nothing here looks like a suite-wide drop."
-      : b.status === "REGRESSION" ? "The whole band is past the line: the suite as a whole is confidently worse."
+      : b.status === "REGRESSION" ? "The whole band lies past the line: the suite as a whole is confidently worse."
       : "With this few tasks and runs, the band is too wide to say anything either way.");
     document.querySelector("#evidence").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   }
@@ -429,9 +479,8 @@ footer a, #evidence a { color: var(--accent); }
   d3.select("#reset").on("click", () => reset(true));
   let rt;
   addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => {
-    const s = D.scenarios[cur], was = played; drawBars(s); if (was) finish(s); else reset(false); }, 150); });
+    const s = D.scenarios[cur], was = played; drawPlate(s); if (was) finish(s); else reset(false); }, 150); });
 
-  const q = new URLSearchParams(location.search);
   const want = D.scenarios.findIndex(s => s.key === (q.get("s") || "collapse"));
   cur = want < 0 ? 1 : want;
   render();
