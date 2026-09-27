@@ -113,6 +113,7 @@ footer a, #detail a { color: var(--accent); }
         <span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="var(--green)"/></svg>run succeeded</span>
         <span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="none" stroke="var(--muted)" stroke-width="1.5"/></svg>run failed</span>
         <span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="var(--red)"/></svg>failed on the PR, succeeded before</span>
+        <span>faded: this PR, not run yet</span>
         <span>click a task for its evidence</span>
       </div>
       <svg id="runs" role="img" aria-label="Runs per task, baseline and candidate"></svg>
@@ -169,44 +170,62 @@ footer a, #detail a { color: var(--accent); }
 
   // ── main plot ────────────────────────────────────────────────────────
   const svg = d3.select("#runs");
-  const ROW = 46, NAME_W = 150, DOT = 19, GAP = 44, TOP = 30;
+  let G = {};                                   // geometry, recomputed per draw
 
-  function layout(s) {
-    const n = s.trials, block = Math.max(n * DOT, 150);          // a column never gets narrower than its label
-    const width = NAME_W + block + GAP + block + 110;
-    const bx = i => NAME_W + i * DOT + 8;
-    const cx = i => NAME_W + block + GAP + i * DOT + 8;
-    return { n, width, bx, cx, height: TOP + s.tasks.length * ROW + 8 };
+  function geometry(s) {
+    const avail = document.querySelector("#runs").parentNode.clientWidth || 700;
+    const compact = avail < 560;
+    const g = compact
+      ? { ROW: 38, NAME_W: 86, DOT: 13, GAP: 22, TOP: 28, R_OK: 4.6, R_FAIL: 4, FS: 12, MIN_BLOCK: 104, COUNT_W: 78, compact }
+      : { ROW: 46, NAME_W: 150, DOT: 19, GAP: 44, TOP: 30, R_OK: 6, R_FAIL: 5.2, FS: 14, MIN_BLOCK: 150, COUNT_W: 110, compact };
+    const n = s.trials, block = Math.max(n * g.DOT, g.MIN_BLOCK);   // a column never gets narrower than its label
+    g.n = n;
+    g.width = g.NAME_W + block + g.GAP + block + g.COUNT_W;
+    g.bx = i => g.NAME_W + i * g.DOT + 8;
+    g.cx = i => g.NAME_W + block + g.GAP + i * g.DOT + 8;
+    g.height = g.TOP + s.tasks.length * g.ROW + 8;
+    return g;
   }
-  const laneY = (r, ok) => TOP + r * ROW + (ok ? 15 : 32);
+  const laneY = (r, ok) => G.TOP + r * G.ROW + (ok ? G.ROW * 0.33 : G.ROW * 0.7);
+  const shortName = n => G.compact ? n.split("-")[0] : n;
+  const count = str => str.split("1").length - 1;
 
   function drawRuns(s) {
-    const L = layout(s);
-    svg.attr("viewBox", `0 0 ${L.width} ${L.height}`).attr("width", "100%")
-      .style("max-width", `${Math.round(L.width * 1.15)}px`).selectAll("*").remove();
-    svg.append("text").attr("x", L.bx(0) - 3).attr("y", 14).attr("font-size", 12).attr("fill", css("--muted")).text("main (baseline)");
-    svg.append("text").attr("x", L.cx(0) - 3).attr("y", 14).attr("font-size", 12).attr("fill", css("--muted")).text("this PR");
+    G = geometry(s);
+    svg.attr("viewBox", `0 0 ${G.width} ${G.height}`).attr("width", "100%")
+      .style("max-width", `${Math.round(G.width * 1.15)}px`).selectAll("*").remove();
+    svg.append("text").attr("x", G.bx(0) - 3).attr("y", 14).attr("font-size", G.FS - 2).attr("fill", css("--muted"))
+      .text(G.compact ? "main" : "main (baseline)");
+    svg.append("text").attr("x", G.cx(0) - 3).attr("y", 14).attr("font-size", G.FS - 2).attr("fill", css("--muted")).text("this PR");
     s.tasks.forEach((t, r) => {
       const g = svg.append("g").attr("class", "row").attr("data-task", t.name);
-      g.append("rect").attr("class", "bg").attr("x", 0).attr("y", TOP + r * ROW + 2).attr("width", L.width)
-        .attr("height", ROW - 4).attr("rx", 8).attr("fill", "transparent");
-      g.append("text").attr("class", "row-name").attr("x", 8).attr("y", TOP + r * ROW + 28).attr("font-size", 14)
-        .attr("font-family", css("--mono")).attr("fill", css("--text")).text(t.name)
-        .on("click", () => showTask(s, t));
-      g.append("line").attr("x1", L.bx(0) - 8).attr("x2", L.cx(L.n - 1) + 8)
-        .attr("y1", TOP + r * ROW + 24).attr("y2", TOP + r * ROW + 24).attr("stroke", css("--faint"));
-      [...t.baseline].forEach((o, i) => dot(g, L.bx(i), laneY(r, o === "1"), o === "1" ? "ok" : "fail"));
-      [...t.baseline].forEach((o, i) => dot(g, L.cx(i), laneY(r, o === "1"), o === "1" ? "ok" : "fail")
-        .attr("class", "cand").attr("data-i", i));
-      g.append("text").attr("class", "count").attr("x", L.cx(L.n - 1) + 22).attr("y", TOP + r * ROW + 28)
-        .attr("font-size", 13).attr("font-family", css("--mono")).attr("fill", css("--muted"))
-        .attr("opacity", 0).text(`${t.baseline.split("1").length - 1}/${s.trials} → ${t.candidate.split("1").length - 1}/${s.trials}`);
+      g.append("rect").attr("class", "bg").attr("x", 0).attr("y", G.TOP + r * G.ROW + 2).attr("width", G.width)
+        .attr("height", G.ROW - 4).attr("rx", 8).attr("fill", "transparent");
+      g.append("text").attr("class", "row-name").attr("x", 8).attr("y", G.TOP + r * G.ROW + G.ROW * 0.6)
+        .attr("font-size", G.FS).attr("font-family", css("--mono")).attr("fill", css("--text")).text(shortName(t.name))
+        .on("click", () => showTask(s, t)).append("title").text(t.name);
+      g.append("line").attr("x1", G.bx(0) - 8).attr("x2", G.cx(G.n - 1) + 8)
+        .attr("y1", G.TOP + r * G.ROW + G.ROW * 0.52).attr("y2", G.TOP + r * G.ROW + G.ROW * 0.52).attr("stroke", css("--faint"));
+      [...t.baseline].forEach((o, i) => dot(g, G.bx(i), laneY(r, o === "1"), o === "1"));
+      [...t.baseline].forEach((o, i) => dot(g, G.cx(i), laneY(r, o === "1"), o === "1")
+        .attr("class", "cand").attr("data-i", i).style("opacity", 0.3));   // not run yet
+      g.append("text").attr("class", "count").attr("x", G.cx(G.n - 1) + (G.compact ? 12 : 22))
+        .attr("y", G.TOP + r * G.ROW + G.ROW * 0.6).attr("font-size", G.FS - 1).attr("font-family", css("--mono"))
+        .attr("fill", css("--muted")).attr("opacity", 0)
+        .text(`${count(t.baseline)}/${s.trials} → ${count(t.candidate)}/${s.trials}`);
     });
   }
-  function dot(g, x, y, kind) {
-    return g.append("circle").attr("cx", x).attr("cy", y).attr("r", kind === "ok" ? 6 : 5.2)
-      .style("fill", kind === "ok" ? css("--green") : "none")
-      .style("stroke", kind === "ok" ? css("--green") : css("--muted")).style("stroke-width", 1.6);
+  function dot(g, x, y, ok) {
+    return g.append("circle").attr("cx", x).attr("cy", y).attr("r", ok ? G.R_OK : G.R_FAIL)
+      .style("fill", ok ? css("--green") : css("--panel"))
+      .style("stroke", ok ? css("--green") : css("--muted")).style("stroke-width", 1.6);
+  }
+  // where a candidate dot ends up, and how it looks
+  function finalStyle(t, i) {
+    const was = t.baseline[i] === "1", now = t.candidate[i] === "1", lost = was && !now;
+    return { now, lost, r: now ? G.R_OK : G.R_FAIL,
+             fill: now ? css("--green") : lost ? css("--red") : css("--panel"),
+             stroke: now ? css("--green") : lost ? css("--red") : css("--muted") };
   }
 
   // ── gates and verdict ────────────────────────────────────────────────
@@ -214,6 +233,7 @@ footer a, #detail a { color: var(--accent); }
     d3.select("#verdict").html(`<span class="pill PENDING">not run yet</span><p>Press play to run the PR.</p>`);
     d3.select("#gate-broad").html(gateHead("Broad reliability", null) + `<p>Did the suite as a whole get worse by at least 10 points?</p>`);
     d3.select("#gate-cap").html(gateHead("Capability regression", null) + `<p>Did a task that reliably worked stop working?</p>`);
+    d3.selectAll("#verdict, #gate-broad, #gate-cap").style("opacity", 1);
   }
   function gateHead(name, status) {
     const cls = status ? PILL[status] : "PENDING";
@@ -222,24 +242,37 @@ footer a, #detail a { color: var(--accent); }
   }
 
   function reveal(s) {
-    const b = s.broad, c = s.capability;
+    const b = s.broad, c = s.capability, line = `−${Math.round(b.threshold * 100)} pts`;
     d3.select("#verdict").html(`<span class="pill ${PILL[s.verdict]}">${LABEL[s.verdict]}</span><p>${MEANING[s.verdict]}</p>`);
-    let bp;
-    if (b.status === "INSUFFICIENT EVIDENCE") bp = `Too few tasks or runs to judge the whole suite (needs at least 5 tasks and 3 runs each).`;
-    else if (b.status === "PASS") bp = `Change ${pts(b.effect)}, interval ${pts(b.ci[0])} to ${pts(b.ci[1])}. It fires only if the effect and the whole interval are past −${Math.round(b.threshold * 100)} pts.`;
-    else bp = `Change ${pts(b.effect)}, with the whole interval past −${Math.round(b.threshold * 100)} pts.`;
-    d3.select("#gate-broad").html(gateHead("Broad reliability", b.status) + `<p>${bp}</p><svg id="mini" width="100%" height="46"></svg>
+    let lead, sub;
+    if (b.status === "INSUFFICIENT EVIDENCE") {
+      lead = "Too few tasks or runs to judge the whole suite.";
+      sub = "It needs at least 5 tasks with 3 runs each.";
+    } else if (b.status === "PASS") {
+      lead = `No suite-wide drop cleared the ${line} block line.`;
+      sub = b.effect < 0
+        ? `Scores did fall (${pts(b.effect)}; interval ${pts(b.ci[0])} to ${pts(b.ci[1])}), but the interval doesn't sit entirely past the line.`
+        : `Change ${pts(b.effect)}; interval ${pts(b.ci[0])} to ${pts(b.ci[1])}.`;
+    } else {
+      lead = `The whole suite is confidently worse by more than ${line.slice(1)}.`;
+      sub = `Change ${pts(b.effect)}; interval ${pts(b.ci[0])} to ${pts(b.ci[1])}.`;
+    }
+    d3.select("#gate-broad").html(gateHead("Broad reliability", b.status) +
+      `<p style="color:var(--text)">${lead}</p><p>${sub}</p><svg id="mini" width="100%" height="46"></svg>
       <button class="linkish" id="why-broad">Why? See the evidence →</button>`);
     miniInterval(b);
     d3.select("#why-broad").on("click", () => showBroad(s));
 
     const capState = c.fired.length ? "REGRESSION" : c.eligible.length ? "PASS" : "NOT MONITORED";
     const chips = [...c.fired.map(t => [t, "FIRED"]), ...c.warnings.map(t => [t, "WARNING"])]
-      .map(([t, k]) => `<span class="chip ${k}" data-task="${t}">${t} · ${k === "FIRED" ? "fired" : "warning"}</span>`).join("");
+      .map(([t, k]) => `<span class="chip ${k}" data-task="${t}">${t} · ${k === "FIRED" ? "collapsed" : "warning"}</span>`).join("");
+    const capLead = c.fired.length ? `${c.fired.length === 1 ? "A task" : "Tasks"} that reliably worked stopped working.`
+      : c.eligible.length ? "No reliable task collapsed." : "Not enough runs to judge any single task.";
     const cp = c.eligible.length
-      ? `${c.eligible.length} of ${c.k} tasks reliable enough to monitor (baseline ≥ ${Math.ceil(c.eligibility * s.trials)}/${s.trials}).`
-      : `Needs ${c.min_trials} runs per side to judge a single task; this PR has ${s.trials}.`;
-    d3.select("#gate-cap").html(gateHead("Capability regression", capState) + `<p>${cp}</p><div>${chips}</div>`);
+      ? `${c.eligible.length} of ${c.k} tasks reliable enough to watch (baseline ≥ ${Math.ceil(c.eligibility * s.trials)}/${s.trials}).`
+      : `Needs ${c.min_trials} runs per side; this PR has ${s.trials}.`;
+    d3.select("#gate-cap").html(gateHead("Capability regression", capState) +
+      `<p style="color:var(--text)">${capLead}</p><p>${cp}</p><div>${chips}</div>`);
     d3.selectAll("#gate-cap .chip").on("click", function () {
       const t = s.tasks.find(x => x.name === this.dataset.task); showTask(s, t);
     });
@@ -259,36 +292,86 @@ footer a, #detail a { color: var(--accent); }
     m.append("circle").attr("cx", x(b.effect)).attr("cy", 22).attr("r", 5).attr("fill", css("--panel")).attr("stroke", col).attr("stroke-width", 2);
   }
 
-  // ── play ─────────────────────────────────────────────────────────────
+  // ── play: calm → the ordinary jitter → the one collapse → the decision ──
   function play() {
     const s = D.scenarios[cur];
     if (tl) tl.kill();
     reset(false);
     const T = reduce ? 0 : 1;
-    tl = gsap.timeline({ onComplete: () => { played = true; reveal(s); highlight(s); } });
+    const heavy = t => t.gate === "FIRED";                // the only dramatic motion
+    const quiet = s.tasks.filter(t => !heavy(t)), falls = s.tasks.filter(heavy);
+    const n = s.trials, N = s.tasks.length * n;
+    const quietScore = s.score.baseline +
+      quiet.reduce((acc, t) => acc + (count(t.candidate) - count(t.baseline)) / N, 0);
     const counter = { v: s.score.baseline };
-    tl.to(counter, { v: s.score.candidate, duration: 2.2 * T, ease: "power1.inOut",
-      onUpdate: () => d3.select("#score-cand").text(pct(counter.v)) }, 0);
+    const show = () => d3.select("#score-cand").text(pct(counter.v));
+    tl = gsap.timeline();
+    d3.selectAll("#verdict, #gate-broad, #gate-cap").style("opacity", 0.35);
+    tl.to(svg.selectAll("circle.cand").nodes(), { opacity: 1, duration: 0.3 * T }, 0);   // the PR starts running
+
+    // 1. ordinary jitter: small, quick, nearly together
+    tl.to(counter, { v: quietScore, duration: 0.9 * T, ease: "power1.inOut", onUpdate: show }, 0.2 * T);
+    quiet.forEach(t => {
+      const r = s.tasks.indexOf(t);
+      const g = svg.select(`g.row[data-task="${t.name}"]`);
+      g.selectAll("circle.cand").each(function () {
+        const i = +this.dataset.i, f = finalStyle(t, i);
+        if (t.baseline[i] === t.candidate[i]) return;
+        tl.to(this, { attr: { cy: laneY(r, f.now), r: f.r }, fill: f.fill, stroke: f.stroke,
+          duration: 0.45 * T, ease: "power2.out" }, (0.25 + 0.04 * r + 0.03 * i) * T);
+      });
+      tl.to(g.select("text.count").node(), { opacity: 1, duration: 0.3 * T }, 1.0 * T);
+    });
+
+    // 2. a beat, then the collapse: a slight lift, then a heavy fall
+    const t0 = (falls.length ? 1.6 : 1.1) * T;
+    falls.forEach(t => {
+      const r = s.tasks.indexOf(t);
+      const g = svg.select(`g.row[data-task="${t.name}"]`);
+      g.selectAll("circle.cand").each(function () {
+        const i = +this.dataset.i, f = finalStyle(t, i);
+        if (t.baseline[i] === t.candidate[i]) return;
+        const at = t0 + 0.07 * i * T;
+        tl.to(this, { attr: { cy: laneY(r, true) - 3 }, duration: 0.12 * T, ease: "power1.out" }, at);
+        tl.to(this, { attr: { cy: laneY(r, f.now), r: f.r }, fill: f.fill, stroke: f.stroke,
+          duration: 0.5 * T, ease: "power3.in" }, at + 0.12 * T);
+      });
+      tl.to(g.select("rect.bg").node(), { attr: { fill: css("--red-bg") }, duration: 0.6 * T }, t0 + 0.6 * T);
+      tl.to(g.select("text.count").node(), { opacity: 1, duration: 0.3 * T }, t0 + 0.9 * T);
+    });
+    if (falls.length)
+      tl.to(counter, { v: s.score.candidate, duration: 0.9 * T, ease: "power2.in", onUpdate: show }, t0 + 0.1 * T);
+
+    // 3. a beat, then the decision: broad, capability, verdict
+    const t1 = t0 + (falls.length ? 1.6 : 0.5) * T;
+    tl.call(() => { reveal(s); d3.selectAll("#verdict, #gate-broad, #gate-cap").style("opacity", 0); }, null, t1);
+    tl.to("#gate-broad", { opacity: 1, duration: 0.4 * T }, t1);
+    tl.to("#gate-cap", { opacity: 1, duration: 0.4 * T }, t1 + 0.45 * T);
+    tl.to("#verdict", { opacity: 1, duration: 0.5 * T }, t1 + 1.0 * T);
+    tl.call(() => finish(s), null, t1 + 1.5 * T);
+  }
+
+  // the end state, drawn directly: used at the end of play, by ?final=1 and on resize
+  function finish(s) {
+    played = true;
+    counterFinal(s);
     s.tasks.forEach((t, r) => {
       const g = svg.select(`g.row[data-task="${t.name}"]`);
       g.selectAll("circle.cand").each(function () {
-        const i = +this.dataset.i, was = t.baseline[i] === "1", now = t.candidate[i] === "1";
-        const lost = was && !now;
-        tl.to(this, { attr: { cy: laneY(r, now), r: now ? 6 : 5.2 },
-          fill: now ? css("--green") : lost ? css("--red") : "rgba(0,0,0,0)",
-          stroke: now ? css("--green") : lost ? css("--red") : css("--muted"),
-          duration: (lost ? 0.9 : 0.5) * T, ease: lost ? "bounce.out" : "power2.out" }, (0.12 * r + 0.03 * i) * T);
+        const f = finalStyle(t, +this.dataset.i);
+        d3.select(this).attr("cy", laneY(r, f.now)).attr("r", f.r).style("fill", f.fill).style("stroke", f.stroke)
+          .style("opacity", 1);
       });
-      tl.to(g.select("text.count").node(), { opacity: 1, duration: 0.3 * T }, (0.12 * r + 0.5) * T);
-    });
-  }
-  function highlight(s) {
-    s.tasks.forEach(t => {
+      g.select("text.count").attr("opacity", 1);
       const bg = t.gate === "FIRED" ? css("--red-bg") : t.gate === "WARNING" ? css("--amber-bg") : "transparent";
-      svg.select(`g.row[data-task="${t.name}"] rect.bg`).attr("fill", bg);
+      g.select("rect.bg").attr("fill", bg);
     });
-    const d = s.score.candidate - s.score.baseline;
-    d3.select("#score-delta").text(`(${pts(d)})`);
+    if (!document.querySelector("#gate-broad .pill:not(.PENDING)")) reveal(s);
+    d3.selectAll("#verdict, #gate-broad, #gate-cap").style("opacity", 1);
+  }
+  function counterFinal(s) {
+    d3.select("#score-cand").text(pct(s.score.candidate));
+    d3.select("#score-delta").text(`(${pts(s.score.candidate - s.score.baseline)})`);
   }
   function reset(full = true) {
     const s = D.scenarios[cur];
@@ -301,26 +384,36 @@ footer a, #detail a { color: var(--accent); }
   }
 
   // ── detail: one task ─────────────────────────────────────────────────
-  function squares(str, fail) {
-    return [...str].map(o => `<span style="display:inline-block;width:13px;height:13px;margin-right:3px;border-radius:3px;
+  function squares(str) {
+    return [...str].map(o => `<span style="display:inline-block;width:15px;height:15px;margin-right:3px;border-radius:3px;
       background:${o === "1" ? "var(--green)" : "var(--faint)"};border:1px solid ${o === "1" ? "var(--green)" : "var(--border)"}"></span>`).join("");
   }
   function showTask(s, t) {
-    const c = s.capability, b = t.baseline.split("1").length - 1, a = t.candidate.split("1").length - 1, n = s.trials;
+    const c = s.capability, b = count(t.baseline), a = count(t.candidate), n = s.trials;
     const drop = (b - a) / n;
-    let verdict;
-    if (!played) verdict = "Press play to run the PR first.";
-    else if (t.gate === "FIRED") verdict = `<b style="color:var(--red)">Fired.</b> A task that reliably worked (${b}/${n}) collapsed to ${a}/${n}. The drop clears the ${Math.round(c.drop_threshold * 100)}-point bar, and a one-sided exact test gives p = ${t.p.toFixed(4)}, below the per-task limit ${c.limit.toFixed(4)} (5% split across all ${c.k} tasks in the suite).`;
-    else if (t.gate === "WARNING") verdict = `<b style="color:var(--amber)">Warning.</b> A noticeable drop, but the evidence doesn't clear the per-task limit (p = ${t.p.toFixed(4)} vs ${c.limit.toFixed(4)}). It is flagged, and it doesn't block.`;
-    else if (t.gate === "PASS") verdict = `<b style="color:var(--green)">Pass.</b> Monitored, and no material drop (p = ${t.p.toFixed(4)}).`;
-    else verdict = `<b>Not monitored.</b> ${t.why_not_monitored ? t.why_not_monitored.charAt(0).toUpperCase() + t.why_not_monitored.slice(1) + "." : ""}`;
-    d3.select("#detail").html(`<h2><code>${t.name}</code></h2>
-      <div class="stats">
-        <div class="stat"><div class="k">main (baseline)</div><div class="v">${b}/${n}</div><div>${squares(t.baseline)}</div></div>
-        <div class="stat"><div class="k">this PR</div><div class="v">${played ? a + "/" + n : "?"}</div><div>${played ? squares(t.candidate) : ""}</div></div>
-        <div class="stat"><div class="k">observed drop</div><div class="v">${played ? Math.round(drop * 100) + " pts" : "?"}</div><div class="muted">capability bar: ${Math.round(c.drop_threshold * 100)} pts</div></div>
-        <div class="stat"><div class="k">evidence</div><div class="v">${played && t.p != null ? "p = " + t.p.toFixed(4) : "—"}</div><div class="muted">limit ≤ ${c.limit.toFixed(4)}</div></div>
-      </div><p>${verdict}</p>`);
+    const state = { FIRED: ["FIRED", "✕ COLLAPSED"], WARNING: ["WARNING", "! WARNING"], PASS: ["PASS", "✓ HELD"],
+                    "NOT MONITORED": ["NOTMON", "NOT MONITORED"] }[t.gate];
+    let why;
+    if (!played) why = "Press play to run the PR first.";
+    else if (t.gate === "FIRED") why = `It worked on every run on main and failed on every run of this PR. That is a capability that stopped working, not noise.`;
+    else if (t.gate === "WARNING") why = `A noticeable drop, but not strong enough evidence to block a merge on its own. It is flagged, and it doesn't fail the check.`;
+    else if (t.gate === "PASS") why = `Watched, and it held up: no material drop.`;
+    else why = t.why_not_monitored ? t.why_not_monitored.charAt(0).toUpperCase() + t.why_not_monitored.slice(1) + "." : "";
+    const support = played && t.p != null
+      ? `Supporting evidence: an observed drop of ${Math.round(drop * 100)} pts (the capability bar is ${Math.round(c.drop_threshold * 100)} pts); a one-sided exact test gives p = ${t.p.toFixed(4)}, against a per-task limit of ${c.limit.toFixed(4)} (5% split across all ${c.k} tasks in the suite).`
+      : "";
+    d3.select("#detail").html(`
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <h2 style="margin:0"><code>${t.name}</code></h2>
+        ${played ? `<span class="pill ${state[0]}" style="font-size:15px">${state[1]}</span>` : ""}
+      </div>
+      <div style="font:700 44px var(--mono);margin:12px 0 6px">${b}/${n} <span class="muted">→</span> ${played ? `<span style="color:${t.gate === "FIRED" ? "var(--red)" : "inherit"}">${a}/${n}</span>` : "?"}</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;margin-bottom:10px">
+        <span class="muted" style="font-size:13px">main</span><div>${squares(t.baseline)}</div>
+        <span class="muted" style="font-size:13px">this PR</span><div>${played ? squares(t.candidate) : ""}</div>
+      </div>
+      <p style="color:var(--text)">${why}</p>
+      ${support ? `<p style="font-size:13px">${support}</p>` : ""}`);
   }
 
   // ── detail: the broad gate ───────────────────────────────────────────
@@ -381,7 +474,7 @@ footer a, #detail a { color: var(--accent); }
     const s = D.scenarios[cur];
     tabs.attr("aria-selected", (_, i) => i === cur);
     d3.select("#scenario-title").text(tabNames[s.key]);
-    d3.select("#story").text(`${s.tasks.length} tasks × ${s.trials} runs per side.`);
+    d3.select("#story").text(`Each dot is one run of the agent: ${s.trials} on main and ${s.trials} on this PR, for each of ${s.tasks.length} tasks.`);
     d3.select("#score-base").text(pct(s.score.baseline));
     reset(true);
   }
@@ -393,7 +486,17 @@ footer a, #detail a { color: var(--accent); }
   render();
   const q = new URLSearchParams(location.search);
   if (q.get("autoplay") === "1" || q.get("final") === "1") play();
-  if (q.get("final") === "1" && tl) tl.progress(1);           // jump to the end state
+  if (q.get("final") === "1") { if (tl) tl.kill(); finish(D.scenarios[cur]); }   // jump to the end state
+  let rt;
+  addEventListener("resize", () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => {
+      const s = D.scenarios[cur], wasPlayed = played;
+      if (tl) tl.kill();
+      drawRuns(s);
+      if (wasPlayed) finish(s); else { d3.select("#score-cand").text("?"); pending(); }
+    }, 150);
+  });
   const openTask = q.get("task"), openBroad = q.get("why") === "broad";
   if (openTask) showTask(D.scenarios[cur], D.scenarios[cur].tasks.find(t => t.name === openTask));
   if (openBroad) showBroad(D.scenarios[cur]);
