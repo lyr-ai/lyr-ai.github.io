@@ -13,6 +13,12 @@ series: Agent reliability
 entry: "Method note 02"
 ---
 
+> **Update, September 2026.** AgentSeism's product direction changed after this
+> note. Comparability and outcome-based CI decisions became the product. Trace
+> localisation, the "traces explain" step and the root-cause stage in Figure 2,
+> remains research-era work and is not part of AgentSeism's product today. See
+> [Method note 03](/why-agent-ci-cant-be-treated-like-deterministic-tests/).
+
 Software regression testing assumes repeated executions are reasonably stable.
 If the same test passes before a change and fails afterward, the change is a
 plausible cause.
