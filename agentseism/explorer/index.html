@@ -3,138 +3,98 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Regression Explorer · AgentSeism</title>
-<meta name="description" content="See what an average hides: play a pull request against a stochastic agent and watch AgentSeism's two gates decide.">
-<meta property="og:title" content="AgentSeism Regression Explorer">
-<meta property="og:description" content="91% → 77% looks like a moderate drop. Play the PR and watch one capability collapse.">
+<title>What the average hides · AgentSeism</title>
+<meta name="description" content="An agent's score fell 14 points. One capability disappeared. Play the pull request and see what the average hides.">
+<meta property="og:title" content="What the average hides">
+<meta property="og:description" content="The average fell 14 points. One capability disappeared. Play the PR.">
 <meta property="og:image" content="https://lyr-ai.github.io/assets/img/agentseism-social-preview.png">
 <style>
 :root {
-  --bg: #fbfbfa; --panel: #ffffff; --text: #1f2328; --muted: #59636e; --faint: #eaeef2;
-  --border: #d0d7de; --green: #1a7f37; --green-bg: #dafbe1; --red: #cf222e; --red-bg: #ffebe9;
+  --bg: #fbfbfa; --panel: #ffffff; --text: #1f2328; --muted: #59636e; --faint: #eaeef2; --band: #f3f5f7;
+  --border: #d0d7de; --green: #1a7f37; --red: #cf222e; --red-bg: #ffebe9;
   --amber: #9a6700; --amber-bg: #fff8c5; --accent: #0969da;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0d1117; --panel: #111820; --text: #e6edf3; --muted: #9198a1; --faint: #21262d;
-    --border: #30363d; --green: #3fb950; --green-bg: #12261e; --red: #f85149; --red-bg: #2d1215;
+    --bg: #0d1117; --panel: #0d1117; --text: #e6edf3; --muted: #9198a1; --faint: #21262d; --band: #161b22;
+    --border: #3d444d; --green: #3fb950; --red: #f85149; --red-bg: #2d1215;
     --amber: #d29922; --amber-bg: #2b2111; --accent: #4493f8;
   }
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); }
-main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 48px; }
-header .kicker { font: 600 12px var(--mono); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
-header h1 { font-size: 28px; margin: 6px 0 4px; }
-header p { color: var(--muted); margin: 0 0 18px; max-width: 70ch; line-height: 1.5; }
-.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-.tabs button, .controls button, .linkish {
-  font: 500 14px var(--sans); border: 1px solid var(--border); background: var(--panel);
-  color: var(--text); border-radius: 999px; padding: 7px 14px; cursor: pointer;
-}
+main { max-width: 900px; margin: 0 auto; padding: 28px 20px 56px; }
+.kicker { font: 600 12px var(--mono); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+h1 { font-size: 30px; margin: 6px 0 4px; }
+.lede { color: var(--muted); margin: 0 0 18px; max-width: 64ch; line-height: 1.5; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+button { font: 500 14px var(--sans); border: 1px solid var(--border); background: var(--panel); color: var(--text);
+  border-radius: 999px; padding: 7px 14px; cursor: pointer; }
 .tabs button[aria-selected="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
-.grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 20px; align-items: start; }
-@media (max-width: 920px) { .grid { grid-template-columns: minmax(0, 1fr); } }
-#runs { display: block; }
-.card { min-width: 0; }
-.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
-.story { color: var(--muted); margin: 0 0 12px; line-height: 1.5; }
-.score { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 6px; }
-.score .label { color: var(--muted); font-size: 14px; }
-.score .num { font: 700 30px var(--mono); }
-.score .delta { font: 500 15px var(--mono); color: var(--muted); }
-.controls { display: flex; gap: 8px; margin: 10px 0 4px; }
+.caption { font-size: 22px; font-weight: 700; margin: 4px 0 2px; min-height: 1.4em; }
+.sub { color: var(--muted); margin: 0 0 12px; font-size: 14px; min-height: 1.3em; }
+.controls { display: flex; gap: 8px; margin: 6px 0 14px; }
 .controls .primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
-.legend { display: flex; gap: 16px; color: var(--muted); font-size: 12px; margin: 8px 0 0; flex-wrap: wrap; }
-.legend span { display: inline-flex; align-items: center; gap: 6px; }
+svg { display: block; }
 svg text { font-family: var(--sans); }
-.row-name { cursor: pointer; }
-.row-name:hover { text-decoration: underline; }
-.pill { display: inline-block; font: 700 13px var(--sans); padding: 3px 10px; border-radius: 999px; border: 1px solid; }
-.pill.PASS { color: var(--green); background: var(--green-bg); border-color: var(--green); }
-.pill.REGRESSION, .pill.FIRED { color: var(--red); background: var(--red-bg); border-color: var(--red); }
-.pill.INSUFFICIENT, .pill.WARNING { color: var(--amber); background: var(--amber-bg); border-color: var(--amber); }
-.pill.PENDING, .pill.NOTMON { color: var(--muted); background: var(--faint); border-color: var(--border); }
-.side h3 { font-size: 13px; margin: 0 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
-.side .gate { margin-bottom: 14px; }
-.side .gate + .gate { border-top: 1px solid var(--border); padding-top: 14px; }
-.gate .head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
-.gate .head strong { font-size: 15px; }
-.gate p { margin: 4px 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
-.verdict { text-align: center; padding: 12px 0 4px; }
-.verdict .pill { font-size: 18px; padding: 6px 16px; }
-.verdict p { color: var(--muted); font-size: 13px; margin: 8px 0 0; line-height: 1.45; }
-.linkish { font-size: 12px; padding: 4px 10px; margin-top: 6px; }
-.chip { cursor: pointer; font: 600 12px var(--mono); border-radius: 6px; padding: 2px 7px; margin: 2px 4px 2px 0; display: inline-block; border: 1px solid; }
-.chip.FIRED { color: var(--red); border-color: var(--red); background: var(--red-bg); }
-.chip.WARNING { color: var(--amber); border-color: var(--amber); background: var(--amber-bg); }
-#detail { margin-top: 20px; }
-#detail h2 { font-size: 18px; margin: 0 0 6px; }
-#detail p { color: var(--muted); line-height: 1.5; margin: 6px 0; max-width: 75ch; }
-#detail .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
-#detail .stat { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-#detail .stat .k { color: var(--muted); font-size: 12px; }
-#detail .stat .v { font: 700 18px var(--mono); margin-top: 2px; }
-.muted { color: var(--muted); }
-footer { margin-top: 28px; color: var(--muted); font-size: 13px; line-height: 1.6; }
-footer a, #detail a { color: var(--accent); }
-.sr { position: absolute; left: -9999px; }
+.cap { cursor: pointer; }
+#versus { margin-top: 20px; }
+.thesis { font-size: 26px; font-weight: 800; line-height: 1.25; margin: 0 0 14px; max-width: 30ch; }
+.thesis .hot { color: var(--red); }
+#decision { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); }
+.gates { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; font-size: 15px; }
+.pill { display: inline-block; font: 700 13px var(--sans); padding: 3px 10px; border-radius: 999px; border: 1px solid; margin-left: 6px; }
+.pill.PASS { color: var(--green); border-color: var(--green); }
+.pill.REGRESSION { color: var(--red); border-color: var(--red); background: var(--red-bg); }
+.pill.INSUFFICIENT { color: var(--amber); border-color: var(--amber); background: var(--amber-bg); }
+.pill.NOTMON { color: var(--muted); border-color: var(--border); }
+.verdict { font-size: 17px; font-weight: 800; }
+.decline { color: var(--muted); font-size: 14px; margin: 10px 0 0; max-width: 72ch; line-height: 1.5; }
+.links { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+.links button { font-size: 13px; padding: 5px 12px; }
+#evidence { margin-top: 28px; padding-top: 18px; border-top: 1px dashed var(--border); }
+#evidence h2 { font-size: 20px; margin: 0 0 4px; }
+#evidence p { color: var(--muted); line-height: 1.5; max-width: 72ch; }
+#evidence .final { color: var(--text); font-weight: 700; font-size: 17px; }
+.hidden { display: none; }
+footer { margin-top: 30px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+footer a, #evidence a { color: var(--accent); }
 </style>
 </head>
 <body>
 <main>
-  <header>
-    <div class="kicker">AgentSeism · Regression Explorer</div>
-    <h1>What the average hides</h1>
-    <p>An agent is stochastic: run it twice and some tasks come out differently. Pick a pull request, press play, and watch
-      every run move. Then see how AgentSeism's two gates decide what the change means.</p>
-  </header>
-
+  <div class="kicker">AgentSeism · Regression Explorer</div>
+  <h1>What the average hides</h1>
+  <p class="lede">An agent is stochastic: run it twice and some tasks come out differently. Each square below is one run.
+    Pick a pull request and play it.</p>
   <div class="tabs" role="tablist" id="tabs"></div>
 
-  <div class="grid">
-    <section class="card" aria-labelledby="scenario-title">
-      <h2 id="scenario-title" class="sr"></h2>
-      <p class="story" id="story"></p>
-      <div class="score">
-        <span class="label">Task success</span>
-        <span class="num" id="score-base"></span>
-        <span class="num muted">→</span>
-        <span class="num" id="score-cand">?</span>
-        <span class="delta" id="score-delta"></span>
-      </div>
-      <div class="controls">
-        <button class="primary" id="play">▶ Play the PR</button>
-        <button id="reset">↺ Reset</button>
-      </div>
-      <div class="legend">
-        <span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="var(--green)"/></svg>run succeeded</span>
-        <span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="none" stroke="var(--muted)" stroke-width="1.5"/></svg>run failed</span>
-        <span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="var(--red)"/></svg>failed on the PR, succeeded before</span>
-        <span>faded: this PR, not run yet</span>
-        <span>click a task for its evidence</span>
-      </div>
-      <svg id="runs" role="img" aria-label="Runs per task, baseline and candidate"></svg>
-    </section>
-
-    <aside class="card side" aria-live="polite">
-      <h3>AgentSeism check</h3>
-      <div class="verdict" id="verdict"></div>
-      <div class="gate" id="gate-broad"></div>
-      <div class="gate" id="gate-cap"></div>
-    </aside>
+  <div class="caption" id="caption" aria-live="polite"></div>
+  <p class="sub" id="sub"></p>
+  <div class="controls">
+    <button class="primary" id="play">▶ Play the PR</button>
+    <button id="reset">↺ Reset</button>
   </div>
 
-  <section class="card" id="detail" aria-live="polite"></section>
+  <svg id="bars" role="img" aria-label="One bar per capability: runs on main and on this PR"></svg>
+
+  <section id="versus" class="hidden" aria-live="polite">
+    <p class="thesis" id="thesis"></p>
+    <svg id="vbars" role="img" aria-label="Overall and the collapsed capability on the same scale"></svg>
+  </section>
+
+  <section id="decision" class="hidden" aria-live="polite"></section>
+
+  <section id="evidence" class="hidden" aria-live="polite"></section>
 
   <footer>
-    <p><b>What this is.</b> These are the three <code>seism demo</code> scenarios. Every run's outcome is written out in the
-      scenario, not drawn at random, and every number and verdict on this page comes from AgentSeism's own decision engine,
-      including the bootstrap distribution. It shows how the check reasons. It is not evidence that the check works.
-      For that, see the <a href="https://github.com/lyr-ai/agentseism/blob/master/analysis/ci_v1/stageC/RESULTS.md">pre-registered
-      real-agent study</a> and the <a href="https://github.com/lyr-ai/agentseism-example/pulls">two public example PRs</a>.</p>
+    <p><b>What this is.</b> These are the three <code>seism demo</code> scenarios. Every run's outcome is written out in the scenario,
+      not drawn at random, and every number and verdict on this page comes from AgentSeism's own decision engine. It shows how
+      the check reasons. It is not evidence that the check works. For that, see the
+      <a href="https://github.com/lyr-ai/agentseism/blob/master/analysis/ci_v1/stageC/RESULTS.md">pre-registered real-agent study</a> and the
+      <a href="https://github.com/lyr-ai/agentseism-example/pulls">two public example PRs</a>.</p>
     <p><a href="https://github.com/lyr-ai/agentseism">github.com/lyr-ai/agentseism</a> ·
       <a href="/why-agent-ci-cant-be-treated-like-deterministic-tests/">Why agent CI can't be treated like deterministic tests</a></p>
   </footer>
@@ -148,350 +108,332 @@ footer a, #detail a { color: var(--accent); }
   const D = window.EXPLORER_DATA;
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const count = s => s.split("1").length - 1;
   const pct = x => `${Math.round(x * 100)}%`;
-  const pts = x => `${x >= 0 ? "+" : "−"}${Math.abs(Math.round(x * 100))} pts`;
-  const LABEL = { PASS: "✓ PASS", REGRESSION: "✕ REGRESSION", INSUFFICIENT_EVIDENCE: "? NEED EVIDENCE",
-                  "INSUFFICIENT EVIDENCE": "? NEED EVIDENCE" };
-  const PILL = { PASS: "PASS", REGRESSION: "REGRESSION", INSUFFICIENT_EVIDENCE: "INSUFFICIENT",
-                 "INSUFFICIENT EVIDENCE": "INSUFFICIENT", FIRED: "FIRED", WARNING: "WARNING",
-                 "NOT MONITORED": "NOTMON" };
-  const MEANING = {
-    PASS: "No material regression found. The check is green.",
-    REGRESSION: "This PR made the agent worse. The check fails.",
-    INSUFFICIENT_EVIDENCE: "Too little evidence to decide. Not a pass.",
-  };
-  let cur = 0, played = false, tl = null;
+  const signed = v => `${v >= 0 ? "+" : "−"}${Math.abs(Math.round(v))}`;
+  const short = n => n.split("-")[0];
+  const TAB = { noise: "Unchanged candidate", collapse: "One capability collapses", insufficient: "Too little evidence" };
+  let cur = 1, played = false, tl = null, G = {};
+
+  // ── the words for each act, per scenario ─────────────────────────────
+  function story(s) {
+    const hero = s.tasks.find(t => t.gate === "FIRED") || null;
+    const o = Math.round((s.score.candidate - s.score.baseline) * 100);
+    const w = { hero, o, a1: `${s.tasks.length} capabilities, ${s.trials} runs each, on main.`,
+                a1s: "Each square is one run. Filled means the agent succeeded." };
+    if (hero) return { ...w,
+      a2: "The PR runs.", a2s: "",
+      a2b: `${short(hero.name)} empties. The rest barely move.`, a2bs: "Everything else steps back so you can see it.",
+      thesis: `The average fell ${-o} points. <span class="hot">One capability disappeared.</span>` };
+    if (s.key === "insufficient") return { ...w,
+      a2: "The PR runs.", a2s: "",
+      a2b: "The score dropped, but look how little there is.", a2bs: `${s.tasks.length} tasks, ${s.trials} runs each.`,
+      thesis: `The average fell ${-o} points, on six runs. That's too little to call.` };
+    return { ...w,
+      a2: "The PR runs.", a2s: "",
+      a2b: "Nothing changed, and the scores still moved.", a2bs: "A few runs flipped, both ways: ordinary run-to-run noise.",
+      thesis: `The average moved ${Math.abs(o)} points. No capability collapsed.` };
+  }
 
   // ── tabs ─────────────────────────────────────────────────────────────
-  const tabNames = { noise: "Unchanged candidate", collapse: "One capability collapses", insufficient: "Too little evidence" };
-  const tabs = d3.select("#tabs").selectAll("button").data(D.scenarios).join("button")
-    .attr("role", "tab").text(s => tabNames[s.key])
-    .on("click", (_, s) => { cur = D.scenarios.indexOf(s); render(); });
+  const tabs = d3.select("#tabs").selectAll("button").data(D.scenarios).join("button").attr("role", "tab")
+    .text(s => TAB[s.key]).on("click", (_, s) => { cur = D.scenarios.indexOf(s); render(); });
 
-  // ── main plot ────────────────────────────────────────────────────────
-  const svg = d3.select("#runs");
-  let G = {};                                   // geometry, recomputed per draw
-
+  // ── the capability bars ──────────────────────────────────────────────
+  const svg = d3.select("#bars");
   function geometry(s) {
-    const avail = document.querySelector("#runs").parentNode.clientWidth || 700;
-    const compact = avail < 560;
-    const g = compact
-      ? { ROW: 38, NAME_W: 86, DOT: 13, GAP: 22, TOP: 28, R_OK: 4.6, R_FAIL: 4, FS: 12, MIN_BLOCK: 104, COUNT_W: 78, compact }
-      : { ROW: 46, NAME_W: 150, DOT: 19, GAP: 44, TOP: 30, R_OK: 6, R_FAIL: 5.2, FS: 14, MIN_BLOCK: 150, COUNT_W: 110, compact };
-    const n = s.trials, block = Math.max(n * g.DOT, g.MIN_BLOCK);   // a column never gets narrower than its label
-    g.n = n;
-    g.width = g.NAME_W + block + g.GAP + block + g.COUNT_W;
-    g.bx = i => g.NAME_W + i * g.DOT + 8;
-    g.cx = i => g.NAME_W + block + g.GAP + i * g.DOT + 8;
-    g.height = g.TOP + s.tasks.length * g.ROW + 8;
+    const c = (document.querySelector("main").clientWidth - 40) < 560;
+    const g = c ? { NAME: 74, CELL: 13, GAP: 2, ROW: 32, FS: 12, ARROW: 30, TAG: 70 }
+                : { NAME: 150, CELL: 22, GAP: 3, ROW: 42, FS: 15, ARROW: 56, TAG: 120 };
+    g.compact = c;
+    g.BAR = s.trials * (g.CELL + g.GAP);
+    const col = Math.max(g.BAR, 90) + 40;
+    g.mainX = g.NAME; g.prX = g.NAME + col + g.ARROW;
+    g.width = g.prX + col + g.TAG;
+    g.height = 26 + s.tasks.length * g.ROW;
     return g;
   }
-  const laneY = (r, ok) => G.TOP + r * G.ROW + (ok ? G.ROW * 0.33 : G.ROW * 0.7);
-  const shortName = n => G.compact ? n.split("-")[0] : n;
-  const count = str => str.split("1").length - 1;
-
-  function drawRuns(s) {
+  function drawBars(s) {
     G = geometry(s);
-    svg.attr("viewBox", `0 0 ${G.width} ${G.height}`).attr("width", "100%")
-      .style("max-width", `${Math.round(G.width * 1.15)}px`).selectAll("*").remove();
-    svg.append("text").attr("x", G.bx(0) - 3).attr("y", 14).attr("font-size", G.FS - 2).attr("fill", css("--muted"))
-      .text(G.compact ? "main" : "main (baseline)");
-    svg.append("text").attr("x", G.cx(0) - 3).attr("y", 14).attr("font-size", G.FS - 2).attr("fill", css("--muted")).text("this PR");
+    svg.attr("viewBox", `0 0 ${G.width} ${G.height}`).attr("width", "100%").style("max-width", `${G.width * 1.1}px`).selectAll("*").remove();
+    svg.append("text").attr("x", G.mainX).attr("y", 14).attr("font-size", G.FS - 3).attr("fill", css("--muted")).text("MAIN");
+    svg.append("text").attr("class", "prlabel").attr("x", G.prX).attr("y", 14).attr("font-size", G.FS - 3).attr("fill", css("--muted")).attr("opacity", 0).text("THIS PR");
     s.tasks.forEach((t, r) => {
-      const g = svg.append("g").attr("class", "row").attr("data-task", t.name);
-      g.append("rect").attr("class", "bg").attr("x", 0).attr("y", G.TOP + r * G.ROW + 2).attr("width", G.width)
-        .attr("height", G.ROW - 4).attr("rx", 8).attr("fill", "transparent");
-      g.append("text").attr("class", "row-name").attr("x", 8).attr("y", G.TOP + r * G.ROW + G.ROW * 0.6)
-        .attr("font-size", G.FS).attr("font-family", css("--mono")).attr("fill", css("--text")).text(shortName(t.name))
-        .on("click", () => showTask(s, t)).append("title").text(t.name);
-      g.append("line").attr("x1", G.bx(0) - 8).attr("x2", G.cx(G.n - 1) + 8)
-        .attr("y1", G.TOP + r * G.ROW + G.ROW * 0.52).attr("y2", G.TOP + r * G.ROW + G.ROW * 0.52).attr("stroke", css("--faint"));
-      [...t.baseline].forEach((o, i) => dot(g, G.bx(i), laneY(r, o === "1"), o === "1"));
-      [...t.baseline].forEach((o, i) => dot(g, G.cx(i), laneY(r, o === "1"), o === "1")
-        .attr("class", "cand").attr("data-i", i).style("opacity", 0.3));   // not run yet
-      g.append("text").attr("class", "count").attr("x", G.cx(G.n - 1) + (G.compact ? 12 : 22))
-        .attr("y", G.TOP + r * G.ROW + G.ROW * 0.6).attr("font-size", G.FS - 1).attr("font-family", css("--mono"))
-        .attr("fill", css("--muted")).attr("opacity", 0)
-        .text(`${count(t.baseline)}/${s.trials} → ${count(t.candidate)}/${s.trials}`);
+      const y = 24 + r * G.ROW;
+      const g = svg.append("g").attr("class", "cap").attr("data-task", t.name).on("click", () => drill(s, t));
+      g.append("rect").attr("x", 0).attr("y", y - 4).attr("width", G.width).attr("height", G.ROW - 4).attr("fill", "transparent");
+      g.append("text").attr("class", "name").attr("x", 4).attr("y", y + G.CELL * 0.8).attr("font-size", G.FS)
+        .attr("font-family", css("--mono")).attr("fill", css("--text")).text(G.compact ? short(t.name) : t.name)
+        .append("title").text(`${t.name}: click to see its runs`);
+      [...t.baseline].forEach((o, i) => g.append("rect").attr("x", G.mainX + i * (G.CELL + G.GAP)).attr("y", y)
+        .attr("width", G.CELL).attr("height", G.CELL).attr("rx", 3).attr("fill", o === "1" ? css("--green") : css("--faint")));
+      g.append("text").attr("x", G.mainX + G.BAR + 8).attr("y", y + G.CELL * 0.8).attr("font-size", G.FS - 2)
+        .attr("font-family", css("--mono")).attr("fill", css("--muted")).text(`${count(t.baseline)}/${s.trials}`);
+      const pr = g.append("g").attr("class", "pr").attr("opacity", 0);
+      pr.append("text").attr("x", G.prX - G.ARROW + 8).attr("y", y + G.CELL * 0.8).attr("font-size", G.FS).attr("fill", css("--muted")).text("→");
+      [...t.candidate].forEach((o, i) => pr.append("rect").attr("class", "p").attr("data-i", i)
+        .attr("x", G.prX + i * (G.CELL + G.GAP)).attr("y", y).attr("width", G.CELL).attr("height", G.CELL).attr("rx", 3)
+        .attr("fill", css("--faint")));
+      pr.append("text").attr("class", "pc").attr("x", G.prX + G.BAR + 8).attr("y", y + G.CELL * 0.8).attr("font-size", G.FS - 2)
+        .attr("font-family", css("--mono")).attr("fill", css("--muted")).text("");
+      pr.append("text").attr("class", "tag").attr("x", G.prX + G.BAR + (G.compact ? 38 : 48)).attr("y", y + G.CELL * 0.8)
+        .attr("font-size", G.FS - 3).attr("font-weight", 800).attr("letter-spacing", ".06em").attr("fill", css("--red")).text("");
     });
   }
-  function dot(g, x, y, ok) {
-    return g.append("circle").attr("cx", x).attr("cy", y).attr("r", ok ? G.R_OK : G.R_FAIL)
-      .style("fill", ok ? css("--green") : css("--panel"))
-      .style("stroke", ok ? css("--green") : css("--muted")).style("stroke-width", 1.6);
-  }
-  // where a candidate dot ends up, and how it looks
-  function finalStyle(t, i) {
-    const was = t.baseline[i] === "1", now = t.candidate[i] === "1", lost = was && !now;
-    return { now, lost, r: now ? G.R_OK : lost && t.gate === "FIRED" ? G.R_OK + 0.8 : G.R_FAIL,
-             fill: now ? css("--green") : lost ? css("--red") : css("--panel"),
-             stroke: now ? css("--green") : lost ? css("--red") : css("--muted") };
+  // one PR cell's final look: success is filled; a collapsed capability's
+  // failures are *empty* (the capability is gone), ordinary failures are faint
+  function cellEnd(t, i) {
+    const ok = t.candidate[i] === "1", hero = t.gate === "FIRED";
+    return ok ? { fill: css("--green"), stroke: "none" }
+      : hero ? { fill: css("--panel"), stroke: css("--border") } : { fill: css("--faint"), stroke: "none" };
   }
 
-  // ── gates and verdict ────────────────────────────────────────────────
-  function pending() {
-    d3.select("#verdict").html(`<span class="pill PENDING">not run yet</span><p>Press play to run the PR.</p>`);
-    d3.select("#gate-broad").html(gateHead("Broad reliability", null) + `<p>Did the suite as a whole get worse by at least 10 points?</p>`);
-    d3.select("#gate-cap").html(gateHead("Capability regression", null) + `<p>Did a task that reliably worked stop working?</p>`);
-    d3.selectAll("#verdict, #gate-broad, #gate-cap").style("opacity", 1);
-  }
-  function gateHead(name, status) {
-    const cls = status ? PILL[status] : "PENDING";
-    const txt = status ? (status === "NOT MONITORED" ? "NOT MONITORED" : LABEL[status] || status) : "—";
-    return `<div class="head"><strong>${name}</strong><span class="pill ${cls}">${txt}</span></div>`;
-  }
-
-  function reveal(s) {
-    const b = s.broad, c = s.capability, line = `−${Math.round(b.threshold * 100)} pts`;
-    d3.select("#verdict").html(`<span class="pill ${PILL[s.verdict]}">${LABEL[s.verdict]}</span><p>${MEANING[s.verdict]}</p>`);
-    const lead = b.status === "INSUFFICIENT EVIDENCE" ? "Too few tasks or runs to judge the suite."
-      : b.status === "PASS" ? `No suite-wide drop cleared ${line}.`
-      : `The whole suite is worse by more than ${line.slice(1)}.`;
-    d3.select("#gate-broad").html(gateHead("Broad reliability", b.status) +
-      `<p style="color:var(--text)">${lead}</p><svg id="mini" width="100%" height="46"></svg>
-      <button class="linkish" id="why-broad">Why? →</button>`);
-    miniInterval(b);
-    d3.select("#why-broad").on("click", () => showBroad(s));
-
-    const capState = c.fired.length ? "REGRESSION" : c.eligible.length ? "PASS" : "NOT MONITORED";
-    const row = (name, k) => { const t = s.tasks.find(x => x.name === name);
-      return `<span class="chip ${k}" data-task="${name}">${name} ${count(t.baseline)}/${s.trials} → ${count(t.candidate)}/${s.trials}</span>`; };
-    const capLead = c.fired.length ? `${c.fired.join(", ")} stopped working.`
-      : c.eligible.length ? "No reliable task collapsed."
-      : `Needs ${c.min_trials} runs per task; this PR has ${s.trials}.`;
-    const chips = [...c.fired.map(t => row(t, "FIRED")), ...c.warnings.map(t => row(t, "WARNING"))].join("");
-    d3.select("#gate-cap").html(gateHead("Capability regression", capState) +
-      `<p style="color:var(--text)">${capLead}</p><div>${chips}</div>`);
-    d3.selectAll("#gate-cap .chip").on("click", function () {
-      const t = s.tasks.find(x => x.name === this.dataset.task); showTask(s, t);
-    });
+  // ── overall vs the collapsed capability, on one scale ────────────────
+  function drawVersus(s, w, final) {
+    const hero = w.hero, L = G.compact ? 200 : 460, x0 = G.compact ? 84 : 130, W = x0 + L + (G.compact ? 150 : 210);
+    const H = hero ? 128 : 60;
+    const v = d3.select("#vbars").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").style("max-width", `${W * 1.1}px`);
+    v.selectAll("*").remove();
+    const pair = (y, label, a, b, hot) => {
+      const delta = Math.round((b - a) * 100);
+      v.append("text").attr("x", 4).attr("y", y + 17).attr("font-size", G.FS).attr("font-weight", 700).attr("font-family", css("--mono"))
+        .attr("fill", hot ? css("--red") : css("--text")).text(label);
+      v.append("rect").attr("x", x0).attr("y", y + 4).attr("width", L).attr("height", 16).attr("rx", 8).attr("fill", css("--faint"));
+      v.append("rect").attr("class", "solid").attr("data-to", b).attr("data-l", L).attr("x", x0).attr("y", y + 4)
+        .attr("width", Math.max(0, L * (final ? b : a))).attr("height", 16).attr("rx", 8).attr("fill", hot ? css("--red") : css("--green"));
+      v.append("text").attr("x", x0).attr("y", y + 38).attr("font-size", G.FS - 3).attr("font-family", css("--mono")).attr("fill", css("--muted"))
+        .text(`${pct(a)} → ${pct(b)}`);
+      v.append("text").attr("class", "delta").attr("data-to", delta).attr("x", x0 + L + 14).attr("y", y + 20)
+        .attr("font-size", G.compact ? 20 : 30).attr("font-weight", 800).attr("font-family", css("--mono"))
+        .attr("fill", hot ? css("--red") : css("--text")).text(final ? `${signed(delta)} pts` : "0 pts");
+    };
+    pair(2, "overall", s.score.baseline, s.score.candidate, false);
+    if (hero) pair(66, G.compact ? short(hero.name) : hero.name, count(hero.baseline) / s.trials, count(hero.candidate) / s.trials, true);
+    d3.select("#thesis").html(w.thesis);
   }
 
-  function miniInterval(b) {
-    const w = document.querySelector("#mini").getBoundingClientRect().width || 290;
-    const x = d3.scaleLinear().domain([-0.65, 0.2]).range([10, w - 10]).clamp(true);
-    const m = d3.select("#mini");
-    m.append("line").attr("x1", x(-0.65)).attr("x2", x(0.2)).attr("y1", 22).attr("y2", 22).attr("stroke", css("--faint")).attr("stroke-width", 6).attr("stroke-linecap", "round");
-    m.append("line").attr("x1", x(-b.threshold)).attr("x2", x(-b.threshold)).attr("y1", 10).attr("y2", 34).attr("stroke", css("--red")).attr("stroke-dasharray", "3 3");
-    m.append("text").attr("x", x(-b.threshold)).attr("y", 45).attr("text-anchor", "middle").attr("font-size", 10).attr("fill", css("--red")).text(`−${Math.round(b.threshold * 100)} pts`);
-    m.append("line").attr("x1", x(0)).attr("x2", x(0)).attr("y1", 14).attr("y2", 30).attr("stroke", css("--muted"));
-    m.append("text").attr("x", x(0)).attr("y", 45).attr("text-anchor", "middle").attr("font-size", 10).attr("fill", css("--muted")).text("0");
-    const col = b.status === "REGRESSION" ? css("--red") : b.status === "PASS" ? css("--green") : css("--amber");
-    m.append("line").attr("x1", x(b.ci[0])).attr("x2", x(b.ci[1])).attr("y1", 22).attr("y2", 22).attr("stroke", col).attr("stroke-width", 6).attr("stroke-linecap", "round");
-    m.append("circle").attr("cx", x(b.effect)).attr("cy", 22).attr("r", 5).attr("fill", css("--panel")).attr("stroke", col).attr("stroke-width", 2);
+  // ── the decision, last ───────────────────────────────────────────────
+  const LABEL = { PASS: "✓ PASS", REGRESSION: "✕ REGRESSION", INSUFFICIENT_EVIDENCE: "? NEED EVIDENCE", "INSUFFICIENT EVIDENCE": "? NEED EVIDENCE" };
+  const PILL = { PASS: "PASS", REGRESSION: "REGRESSION", INSUFFICIENT_EVIDENCE: "INSUFFICIENT", "INSUFFICIENT EVIDENCE": "INSUFFICIENT" };
+  function drawDecision(s, w) {
+    const c = s.capability, capState = c.fired.length ? "REGRESSION" : c.eligible.length ? "PASS" : "NOT MONITORED";
+    const line = s.verdict === "REGRESSION" && s.broad.status === "PASS"
+      ? "The broad check saw a modest drop across the suite. The capability check saw one task stop working. Either one fails the PR."
+      : s.verdict === "PASS" ? "No material regression found. The check is green."
+      : "Too little evidence to decide. The check fails until there are more runs or tasks, and it is not a regression.";
+    d3.select("#decision").html(`
+      <div class="gates">
+        <span>Broad reliability<span class="pill ${PILL[s.broad.status]}">${LABEL[s.broad.status]}</span></span>
+        <span>Capability regression<span class="pill ${capState === "NOT MONITORED" ? "NOTMON" : PILL[capState]}">${capState === "NOT MONITORED" ? "NOT MONITORED" : LABEL[capState]}</span></span>
+        <span class="verdict">AgentSeism <span class="pill ${PILL[s.verdict]}" style="font-size:15px">${LABEL[s.verdict]}</span></span>
+      </div>
+      <p class="decline">${line}</p>
+      <div class="links">
+        ${w.hero ? `<button id="go-hero">See ${w.hero.name}'s runs ↓</button>` : ""}
+        <button id="go-broad">Why did the broad check ${s.broad.status === "PASS" ? "pass" : s.broad.status === "REGRESSION" ? "fire" : "abstain"}? ↓</button>
+      </div>`);
+    d3.select("#go-hero").on("click", () => drill(s, w.hero));
+    d3.select("#go-broad").on("click", () => showBroad(s));
   }
 
-  // ── play: calm → the ordinary jitter → the one collapse → the decision ──
+  // ── play, about five seconds: main → the PR → one empties → the gap → the decision
   function play() {
-    const s = D.scenarios[cur];
-    if (tl) tl.kill();
+    const s = D.scenarios[cur], w = story(s), hero = w.hero;
     reset(false);
     const T = reduce ? 0 : 1;
-    const heavy = t => t.gate === "FIRED";                // the only dramatic motion
-    const quiet = s.tasks.filter(t => !heavy(t)), falls = s.tasks.filter(heavy);
-    const n = s.trials, N = s.tasks.length * n;
-    const quietScore = s.score.baseline +
-      quiet.reduce((acc, t) => acc + (count(t.candidate) - count(t.baseline)) / N, 0);
-    const counter = { v: s.score.baseline };
-    const show = () => d3.select("#score-cand").text(pct(counter.v));
     tl = gsap.timeline();
-    d3.selectAll("#verdict, #gate-broad, #gate-cap").style("opacity", 0.35);
-    tl.to(svg.selectAll("circle.cand").nodes(), { opacity: 1, duration: 0.3 * T }, 0);   // the PR starts running
-
-    // 1. ordinary jitter: small, quick, nearly together
-    tl.to(counter, { v: quietScore, duration: 0.9 * T, ease: "power1.inOut", onUpdate: show }, 0.2 * T);
-    quiet.forEach(t => {
-      const r = s.tasks.indexOf(t);
-      const g = svg.select(`g.row[data-task="${t.name}"]`);
-      g.selectAll("circle.cand").each(function () {
-        const i = +this.dataset.i, f = finalStyle(t, i);
-        if (t.baseline[i] === t.candidate[i]) return;
-        tl.to(this, { attr: { cy: laneY(r, f.now), r: f.r }, fill: f.fill, stroke: f.stroke,
-          duration: 0.45 * T, ease: "power2.out" }, (0.25 + 0.04 * r + 0.03 * i) * T);
-      });
-      tl.to(g.select("text.count").node(), { opacity: 1, duration: 0.3 * T }, 1.0 * T);
-    });
-
-    // 2. a beat, then the collapse: a slight lift, then a heavy fall
-    const t0 = (falls.length ? 1.6 : 1.1) * T;
-    falls.forEach(t => {
-      const r = s.tasks.indexOf(t);
-      const g = svg.select(`g.row[data-task="${t.name}"]`);
-      g.selectAll("circle.cand").each(function () {
-        const i = +this.dataset.i, f = finalStyle(t, i);
-        if (t.baseline[i] === t.candidate[i]) return;
-        const at = t0 + 0.07 * i * T;
-        tl.to(this, { attr: { cy: laneY(r, true) - 3 }, duration: 0.12 * T, ease: "power1.out" }, at);
-        tl.to(this, { attr: { cy: laneY(r, f.now), r: f.r }, fill: f.fill, stroke: f.stroke,
-          duration: 0.5 * T, ease: "power3.in" }, at + 0.12 * T);
-      });
-      tl.to(g.select("rect.bg").node(), { attr: { fill: css("--red-bg") }, duration: 0.6 * T }, t0 + 0.6 * T);
-      tl.to(g.select("text.count").node(), { opacity: 1, duration: 0.3 * T }, t0 + 0.9 * T);
-      tl.set(g.select("text.count").node(), { attr: { fill: css("--red"), "font-weight": 700 } }, t0 + 0.9 * T);
-    });
-    if (falls.length)
-      tl.to(counter, { v: s.score.candidate, duration: 0.9 * T, ease: "power2.in", onUpdate: show }, t0 + 0.1 * T);
-
-    // 3. a beat, then the decision: broad, capability, verdict
-    const t1 = t0 + (falls.length ? 1.6 : 0.5) * T;
-    tl.call(() => { reveal(s); d3.selectAll("#verdict, #gate-broad, #gate-cap").style("opacity", 0); }, null, t1);
-    tl.to("#gate-broad", { opacity: 1, duration: 0.4 * T }, t1);
-    tl.to("#gate-cap", { opacity: 1, duration: 0.4 * T }, t1 + 0.45 * T);
-    tl.to("#verdict", { opacity: 1, duration: 0.5 * T }, t1 + 1.0 * T);
-    tl.call(() => finish(s), null, t1 + 1.5 * T);
-  }
-
-  // the end state, drawn directly: used at the end of play, by ?final=1 and on resize
-  function finish(s) {
-    played = true;
-    counterFinal(s);
+    const say = (at, a, b) => tl.call(() => { d3.select("#caption").text(a); d3.select("#sub").text(b); }, null, at);
+    // 0–1 s: main, as it is
+    // 1–2 s: the PR column grows in; everything settles quickly (the hero looks fine for now)
+    say(0.6 * T, w.a2, w.a2s);
+    tl.to(svg.select("text.prlabel").node(), { opacity: 1, duration: 0.3 * T }, 0.6 * T);
     s.tasks.forEach((t, r) => {
-      const g = svg.select(`g.row[data-task="${t.name}"]`);
-      g.selectAll("circle.cand").each(function () {
-        const f = finalStyle(t, +this.dataset.i);
-        d3.select(this).attr("cy", laneY(r, f.now)).attr("r", f.r).style("fill", f.fill).style("stroke", f.stroke)
-          .style("opacity", 1);
+      const g = svg.select(`g.cap[data-task="${t.name}"]`);
+      tl.to(g.select("g.pr").node(), { opacity: 1, duration: 0.3 * T }, (0.7 + 0.04 * r) * T);
+      g.selectAll("rect.p").each(function () {
+        const i = +this.dataset.i, e = t === hero ? { fill: css("--green") } : cellEnd(t, i);
+        tl.to(this, { attr: { fill: e.fill }, stroke: e.stroke || "none", duration: 0.25 * T }, (0.8 + 0.04 * r + 0.03 * i) * T);
       });
-      g.select("text.count").attr("opacity", 1)
-        .attr("fill", t.gate === "FIRED" ? css("--red") : css("--muted"))
-        .attr("font-weight", t.gate === "FIRED" ? 700 : 400);
-      const bg = t.gate === "FIRED" ? css("--red-bg") : t.gate === "WARNING" ? css("--amber-bg") : "transparent";
-      g.select("rect.bg").attr("fill", bg);
+      if (t !== hero) tl.call(() => g.select("text.pc").text(`${count(t.candidate)}/${s.trials}`), null, 1.5 * T);
     });
-    if (!document.querySelector("#gate-broad .pill:not(.PENDING)")) reveal(s);
-    d3.selectAll("#verdict, #gate-broad, #gate-cap").style("opacity", 1);
+    let t2 = 2.0 * T;
+    if (hero) {
+      // 2–3 s: the others step back; the hero empties, one run at a time
+      say(t2, w.a2b, w.a2bs);
+      s.tasks.forEach(t => { if (t !== hero) tl.to(svg.select(`g.cap[data-task="${t.name}"]`).node(), { opacity: 0.2, duration: 0.35 * T }, t2); });
+      const g = svg.select(`g.cap[data-task="${hero.name}"]`);
+      tl.call(() => g.select("text.name").attr("font-weight", 700), null, t2);
+      const n = s.trials, cells = g.selectAll("rect.p").nodes();
+      cells.forEach((c, i) => {
+        const e = cellEnd(hero, +c.dataset.i), at = t2 + (0.25 + 0.09 * i) * T;
+        tl.to(c, { attr: { fill: e.fill }, stroke: e.stroke, strokeWidth: 1.2, duration: 0.12 * T, ease: "power2.in" }, at);
+        tl.call(() => g.select("text.pc").text(`${n - i - 1}/${n}`).attr("fill", css("--red")).attr("font-weight", 800), null, at + 0.1 * T);
+      });
+      tl.call(() => g.select("text.tag").text("COLLAPSED"), null, t2 + (0.3 + 0.09 * n) * T);
+      t2 += 1.2 * T;
+    } else {
+      say(t2 - 0.4 * T, w.a2b, w.a2bs);
+      t2 += 0.2 * T;
+    }
+    // 3–4 s: the gap between the average and the capability, on one scale
+    tl.to(svg.selectAll("g.cap").nodes(), { opacity: hero ? 0.35 : 1, duration: 0.4 * T }, t2);
+    if (hero) tl.to(svg.select(`g.cap[data-task="${hero.name}"]`).node(), { opacity: 1, duration: 0.01 }, t2);
+    tl.call(() => { drawVersus(s, w, false); d3.select("#versus").classed("hidden", false).style("opacity", 0); }, null, t2);
+    tl.to("#versus", { opacity: 1, duration: 0.3 * T }, t2 + 0.01);
+    tl.call(() => {
+      d3.selectAll("#vbars rect.solid").each(function () {
+        gsap.to(this, { attr: { width: Math.max(0, +this.dataset.l * +this.dataset.to) }, duration: 0.8 * T, ease: "power2.inOut" });
+      });
+      d3.selectAll("#vbars text.delta").each(function () {
+        const o = { v: 0 }, to = +this.dataset.to, el = this;
+        gsap.to(o, { v: to, duration: 0.8 * T, ease: "power2.out", onUpdate: () => { el.textContent = `${signed(o.v)} pts`; } });
+      });
+    }, null, t2 + 0.1 * T);
+    // 4–5 s: the decision
+    const t3 = t2 + 1.2 * T;
+    tl.call(() => { drawDecision(s, w); d3.select("#decision").classed("hidden", false).style("opacity", 0); }, null, t3);
+    tl.to("#decision", { opacity: 1, duration: 0.5 * T }, t3 + 0.01);
+    tl.call(() => { played = true; svg.selectAll("g.cap").style("opacity", 1); }, null, t3 + 0.8 * T);
   }
-  function counterFinal(s) {
-    d3.select("#score-cand").text(pct(s.score.candidate));
-    d3.select("#score-delta").text(`(${pts(s.score.candidate - s.score.baseline)})`);
+
+  // the end state, drawn directly (for ?final=1, resize, reduced motion)
+  function finish(s) {
+    const w = story(s);
+    if (tl) tl.kill();
+    svg.select("text.prlabel").attr("opacity", 1);
+    s.tasks.forEach(t => {
+      const g = svg.select(`g.cap[data-task="${t.name}"]`).style("opacity", 1);
+      g.select("g.pr").attr("opacity", 1);
+      g.selectAll("rect.p").each(function () {
+        const e = cellEnd(t, +this.dataset.i);
+        d3.select(this).attr("fill", e.fill).attr("stroke", e.stroke).attr("stroke-width", 1.2);
+      });
+      const hot = t.gate === "FIRED";
+      g.select("text.pc").text(`${count(t.candidate)}/${s.trials}`).attr("fill", hot ? css("--red") : css("--muted")).attr("font-weight", hot ? 800 : 400);
+      g.select("text.tag").text(hot ? "COLLAPSED" : "");
+      g.select("text.name").attr("font-weight", hot ? 700 : 400);
+    });
+    d3.select("#caption").text(w.a2b); d3.select("#sub").text(w.a2bs);
+    drawVersus(s, w, true); d3.select("#versus").classed("hidden", false).style("opacity", 1);
+    drawDecision(s, w); d3.select("#decision").classed("hidden", false).style("opacity", 1);
+    played = true;
   }
+
   function reset(full = true) {
-    const s = D.scenarios[cur];
-    if (full && tl) tl.kill();
+    const s = D.scenarios[cur], w = story(s);
+    if (tl) tl.kill();
     played = false;
-    drawRuns(s);
-    d3.select("#score-cand").text("?"); d3.select("#score-delta").text("");
-    pending();
-    if (full) d3.select("#detail").html(intro(s));
+    drawBars(s);
+    d3.select("#caption").text(w.a1); d3.select("#sub").text(w.a1s);
+    d3.selectAll("#versus, #decision").classed("hidden", true);
+    if (full) d3.select("#evidence").classed("hidden", true).html("");
   }
 
-  // ── detail: one task ─────────────────────────────────────────────────
-  function squares(str) {
-    return [...str].map(o => `<span style="display:inline-block;width:15px;height:15px;margin-right:3px;border-radius:3px;
-      background:${o === "1" ? "var(--green)" : "var(--faint)"};border:1px solid ${o === "1" ? "var(--green)" : "var(--border)"}"></span>`).join("");
-  }
-  function showTask(s, t) {
-    const c = s.capability, b = count(t.baseline), a = count(t.candidate), n = s.trials;
-    const drop = (b - a) / n;
-    const state = { FIRED: ["FIRED", "✕ COLLAPSED"], WARNING: ["WARNING", "! WARNING"], PASS: ["PASS", "✓ HELD"],
-                    "NOT MONITORED": ["NOTMON", "NOT MONITORED"] }[t.gate];
-    let why;
-    if (!played) why = "Press play to run the PR first.";
-    else if (t.gate === "FIRED") why = `It worked on every run on main and failed on every run of this PR. That is a capability that stopped working, not noise.`;
-    else if (t.gate === "WARNING") why = `A noticeable drop, but not strong enough evidence to block a merge on its own. It is flagged, and it doesn't fail the check.`;
-    else if (t.gate === "PASS") why = `Watched, and it held up: no material drop.`;
-    else why = t.why_not_monitored ? t.why_not_monitored.charAt(0).toUpperCase() + t.why_not_monitored.slice(1) + "." : "";
-    const support = played && t.p != null
-      ? `Supporting evidence: an observed drop of ${Math.round(drop * 100)} pts (the capability bar is ${Math.round(c.drop_threshold * 100)} pts); a one-sided exact test gives p = ${t.p.toFixed(4)}, against a per-task limit of ${c.limit.toFixed(4)} (5% split across all ${c.k} tasks in the suite).`
-      : "";
-    d3.select("#detail").html(`
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <h2 style="margin:0"><code>${t.name}</code></h2>
-        ${played ? `<span class="pill ${state[0]}" style="font-size:15px">${state[1]}</span>` : ""}
-      </div>
-      <div style="font:700 44px var(--mono);margin:12px 0 6px">${b}/${n} <span class="muted">→</span> ${played ? `<span style="color:${t.gate === "FIRED" ? "var(--red)" : "inherit"}">${a}/${n}</span>` : "?"}</div>
-      <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;margin-bottom:10px">
-        <span class="muted" style="font-size:13px">main</span><div>${squares(t.baseline)}</div>
-        <span class="muted" style="font-size:13px">this PR</span><div>${played ? squares(t.candidate) : ""}</div>
-      </div>
-      <p style="color:var(--text)">${why}</p>
-      ${support ? `<p style="font-size:13px">${support}</p>` : ""}`);
+  // ── drill-down: one capability's runs, falling one at a time ─────────
+  function drill(s, t, instant = false) {
+    const n = s.trials, b = count(t.baseline), a = count(t.candidate), c = s.capability;
+    d3.select("#evidence").classed("hidden", false).html(`
+      <h2><code>${t.name}</code></h2>
+      <p>Each circle is one run: where it was on main (dashed), and where it landed on this PR.</p>
+      <svg id="zoom" width="100%"></svg><p class="final" id="zfinal"></p><p id="zwhy"></p>`);
+    const W = 760, H = 232, x0 = 190, step = Math.min(62, 500 / n);
+    const z = d3.select("#zoom").attr("viewBox", `0 0 ${W} ${H}`).style("max-width", `${W}px`);
+    const band = (y, label, col) => {
+      z.append("rect").attr("x", 10).attr("y", y).attr("width", W - 20).attr("height", 62).attr("rx", 8).attr("fill", col);
+      z.append("text").attr("x", W - 26).attr("y", y + 37).attr("text-anchor", "end").attr("font-size", 12).attr("font-family", css("--mono")).attr("fill", css("--muted")).text(label);
+    };
+    band(10, "WORKING", css("--band")); band(160, "FAILED", css("--red-bg"));
+    const yOf = ok => ok ? 41 : 191;
+    const pc = z.append("text").attr("x", 24).attr("y", 128).attr("font-size", 28).attr("font-weight", 800).attr("font-family", css("--mono"))
+      .attr("fill", css("--text")).text(`${b}/${n}`);
+    z.append("text").attr("x", 24).attr("y", 146).attr("font-size", 12).attr("fill", css("--muted")).text("this PR, so far");
+    let live = b;
+    const moves = [];
+    [...t.baseline].forEach((o, i) => {
+      const x = x0 + i * step, was = o === "1", now = t.candidate[i] === "1";
+      z.append("circle").attr("cx", x).attr("cy", yOf(was)).attr("r", 11).attr("fill", "none").attr("stroke", css("--muted")).attr("stroke-dasharray", "3 3");
+      const d = z.append("circle").attr("cx", x).attr("cy", yOf(was)).attr("r", 11).attr("fill", was ? css("--green") : css("--muted"));
+      if (was !== now) moves.push({ d, now });
+    });
+    const done = () => {
+      pc.text(`${a}/${n}`).attr("fill", t.gate === "FIRED" ? css("--red") : css("--text"));
+      d3.select("#zfinal").text(t.gate === "FIRED" ? `${n} independent runs. Every one failed.` : `${a} of ${n} runs succeeded on this PR, against ${b} on main.`);
+    };
+    moves.forEach(({ d, now }, k) => {
+      const land = () => { live += now ? 1 : -1; pc.text(`${live}/${n}`).attr("fill", live < b ? css("--red") : css("--text")); };
+      if (reduce || instant) { d.attr("cy", yOf(now)).attr("fill", now ? css("--green") : css("--red")); return; }
+      gsap.to(d.node(), { attr: { cy: yOf(now) }, fill: now ? css("--green") : css("--red"), duration: 0.45,
+        ease: now ? "power2.out" : "power3.in", delay: 0.3 + 0.28 * k, onComplete: land });
+    });
+    if (reduce || instant || !moves.length) done();
+    else gsap.delayedCall(0.3 + 0.28 * moves.length + 0.5, done);
+    let why = t.gate === "FIRED" ? "It worked on every run on main and failed on every run of this PR: a capability that stopped working, not noise."
+      : t.gate === "WARNING" ? "A noticeable drop, flagged as a warning. The evidence isn't strong enough to block a merge on its own."
+      : t.gate === "PASS" ? "It held up: any change here is within this agent's usual run-to-run wobble."
+      : (t.why_not_monitored ? t.why_not_monitored.charAt(0).toUpperCase() + t.why_not_monitored.slice(1) + "." : "");
+    if (t.p != null) why += ` <span style="font-size:13px">Supporting evidence: a drop of ${Math.round((b - a) / n * 100)} pts (the bar is ${Math.round(c.drop_threshold * 100)}); a one-sided exact test gives p = ${t.p.toFixed(4)}, against a per-task limit of ${c.limit.toFixed(4)} across ${c.k} tasks.</span>`;
+    d3.select("#zwhy").html(why);
+    document.querySelector("#evidence").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   }
 
-  // ── detail: the broad gate ───────────────────────────────────────────
+  // ── the statistics layer: why the broad gate decided what it did ─────
   function showBroad(s) {
     const b = s.broad;
-    d3.select("#detail").html(`<h2>Broad reliability: why ${b.status === "PASS" ? "it passed" : b.status === "REGRESSION" ? "it fired" : "it couldn't decide"}</h2>
-      <p>The broad gate asks about the <b>suite</b>, so its unit of evidence is the task, not the run. Top: each task's change
-      from main to this PR. Bottom: the ${b.boot_means.length.toLocaleString()} resampled averages AgentSeism draws by
-      picking tasks with replacement. The shaded band is the 95% interval. It blocks only if the whole band sits past
-      the −${Math.round(b.threshold * 100)} pts line.</p>
-      <svg id="strip" width="100%" height="120"></svg><svg id="hist" width="100%" height="190"></svg>`);
+    d3.select("#evidence").classed("hidden", false).html(`<h2>Broad reliability: why it ${b.status === "PASS" ? "passed" : b.status === "REGRESSION" ? "fired" : "couldn't decide"}</h2>
+      <p>This check asks about the <b>suite</b>, so its unit of evidence is the task, not the run. Top: each task's change.
+      Bottom: ${b.boot_means.length.toLocaleString()} resampled averages, drawn by picking tasks with replacement. It blocks only if the
+      whole 95% band sits past the −${Math.round(b.threshold * 100)} pts line.</p>
+      <svg id="strip" width="100%" height="110"></svg><svg id="hist" width="100%" height="190"></svg><p id="bwhy"></p>`);
     const w = document.querySelector("#strip").getBoundingClientRect().width || 700;
-    const x = d3.scaleLinear().domain([-1.05, 0.3]).range([40, w - 20]);
+    const x = d3.scaleLinear().domain([-1.05, 0.3]).range([30, w - 20]);
     const st = d3.select("#strip");
-    const entries = Object.entries(b.per_task).map(([k, v]) => [k.split("/").pop().replace(".json", ""), v]);
-    st.append("g").attr("transform", "translate(0,90)").call(d3.axisBottom(x).ticks(6).tickFormat(v => `${Math.round(v * 100)}`))
+    st.append("g").attr("transform", "translate(0,82)").call(d3.axisBottom(x).ticks(6).tickFormat(v => `${Math.round(v * 100)}`))
       .call(g => g.selectAll("text").attr("fill", css("--muted"))).call(g => g.selectAll("line,path").attr("stroke", css("--border")));
-    st.append("text").attr("x", w - 20).attr("y", 115).attr("text-anchor", "end").attr("font-size", 11).attr("fill", css("--muted")).text("change per task (pts) →");
-    const bins = {};
-    entries.forEach(([k, v]) => {
-      const key = Math.round(v * 100); bins[key] = (bins[key] || 0) + 1;
-      const y = 78 - (bins[key] - 1) * 14;
-      st.append("circle").attr("cx", x(v)).attr("cy", y).attr("r", 6)
-        .attr("fill", v <= -0.5 ? css("--red") : v < 0 ? css("--amber") : css("--green"))
-        .append("title").text(`${k}: ${pts(v)}`);
-      if (v <= -0.5) st.append("text").attr("x", x(v) + 10).attr("y", y + 4).attr("font-size", 12)
-        .attr("font-family", css("--mono")).attr("fill", css("--red")).text(k);
+    const stack = {};
+    Object.entries(b.per_task).forEach(([k, v]) => {
+      const name = k.split("/").pop().replace(".json", ""), key = Math.round(v * 100);
+      stack[key] = (stack[key] || 0) + 1;
+      const y = 70 - (stack[key] - 1) * 13;
+      st.append("circle").attr("cx", x(v)).attr("cy", y).attr("r", 5.5).attr("fill", v <= -0.5 ? css("--red") : v < 0 ? css("--amber") : css("--green")).append("title").text(`${name}: ${signed(v * 100)} pts`);
+      if (v <= -0.5) st.append("text").attr("x", x(v) + 9).attr("y", y + 4).attr("font-size", 12).attr("font-family", css("--mono")).attr("fill", css("--red")).text(name);
     });
     const hw = document.querySelector("#hist").getBoundingClientRect().width || 700;
-    const hx = d3.scaleLinear().domain([-0.65, 0.2]).range([40, hw - 20]);
-    const binsH = d3.bin().domain(hx.domain()).thresholds(hx.ticks(60))(b.boot_means);
-    const hy = d3.scaleLinear().domain([0, d3.max(binsH, d => d.length)]).range([150, 34]);
-    const h = d3.select("#hist");
-    const col = b.status === "REGRESSION" ? css("--red") : b.status === "PASS" ? css("--green") : css("--amber");
+    const hx = d3.scaleLinear().domain([-0.65, 0.2]).range([30, hw - 20]);
+    const bins = d3.bin().domain(hx.domain()).thresholds(hx.ticks(60))(b.boot_means);
+    const hy = d3.scaleLinear().domain([0, d3.max(bins, d => d.length)]).range([150, 34]);
+    const h = d3.select("#hist"), col = b.status === "REGRESSION" ? css("--red") : b.status === "PASS" ? css("--green") : css("--amber");
     h.append("rect").attr("x", hx(b.ci[0])).attr("width", Math.max(2, hx(b.ci[1]) - hx(b.ci[0]))).attr("y", 26).attr("height", 124).attr("fill", col).attr("opacity", 0.12);
-    h.selectAll("rect.bar").data(binsH).join("rect").attr("class", "bar").attr("x", d => hx(d.x0) + 0.5)
-      .attr("width", d => Math.max(0, hx(d.x1) - hx(d.x0) - 1)).attr("y", d => hy(d.length)).attr("height", d => 150 - hy(d.length))
-      .attr("fill", css("--muted")).attr("opacity", 0.55);
+    h.selectAll("rect.bar").data(bins).join("rect").attr("class", "bar").attr("x", d => hx(d.x0) + 0.5).attr("width", d => Math.max(0, hx(d.x1) - hx(d.x0) - 1))
+      .attr("y", d => hy(d.length)).attr("height", d => 150 - hy(d.length)).attr("fill", css("--muted")).attr("opacity", 0.55);
     h.append("line").attr("x1", hx(-b.threshold)).attr("x2", hx(-b.threshold)).attr("y1", 18).attr("y2", 150).attr("stroke", css("--red")).attr("stroke-dasharray", "4 4");
     h.append("text").attr("x", hx(-b.threshold) - 4).attr("y", 12).attr("text-anchor", "end").attr("font-size", 11).attr("fill", css("--red")).text(`block line −${Math.round(b.threshold * 100)} pts`);
-    h.append("text").attr("x", hx(b.ci[1]) + 4).attr("y", 12).attr("font-size", 11).attr("fill", col).text(`95% interval ${pts(b.ci[0])} to ${pts(b.ci[1])}`);
+    h.append("text").attr("x", hx(b.ci[1]) + 4).attr("y", 12).attr("font-size", 11).attr("fill", col).text(`95% band ${signed(b.ci[0] * 100)} to ${signed(b.ci[1] * 100)} pts`);
     h.append("g").attr("transform", "translate(0,150)").call(d3.axisBottom(hx).ticks(8).tickFormat(v => `${Math.round(v * 100)}`))
       .call(g => g.selectAll("text").attr("fill", css("--muted"))).call(g => g.selectAll("line,path").attr("stroke", css("--border")));
-    h.append("text").attr("x", hw - 20).attr("y", 184).attr("text-anchor", "end").attr("font-size", 11).attr("fill", css("--muted")).text("resampled average change (pts) →");
-    const why = b.status === "PASS" && s.capability.fired.length
-      ? "The interval reaches past the line on the left, but its right end stays short of it: resamples that leave out the collapsed task look almost unchanged. That is the average hiding one task. The capability gate looks at each task directly, and it fired."
-      : b.status === "PASS" ? "Most of the band sits near zero. Nothing here looks like a suite-wide drop."
+    d3.select("#bwhy").html(b.status === "PASS" && s.capability.fired.length
+      ? "The band reaches past the line on the left, but its right end stays short of it: resamples that leave out the collapsed task look almost unchanged. That is the average hiding one task, and it is why AgentSeism also judges each task directly."
+      : b.status === "PASS" ? "The band sits around zero. Nothing here looks like a suite-wide drop."
       : b.status === "REGRESSION" ? "The whole band is past the line: the suite as a whole is confidently worse."
-      : "With this few tasks and runs, the band is too wide to say anything either way.";
-    d3.select("#detail").append("p").html(why);
+      : "With this few tasks and runs, the band is too wide to say anything either way.");
+    document.querySelector("#evidence").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   }
 
-  function intro(s) {
-    return `<h2>${tabNames[s.key]}</h2><p>${s.story} Press <b>▶ Play the PR</b>. Afterwards, click a task name or a gate to see its evidence.</p>`;
-  }
+  function render() { tabs.attr("aria-selected", (_, i) => i === cur); reset(true); }
 
-  function render() {
-    const s = D.scenarios[cur];
-    tabs.attr("aria-selected", (_, i) => i === cur);
-    d3.select("#scenario-title").text(tabNames[s.key]);
-    d3.select("#story").text(`Each dot is one run of the agent: ${s.trials} on main and ${s.trials} on this PR, for each of ${s.tasks.length} tasks.`);
-    d3.select("#score-base").text(pct(s.score.baseline));
-    reset(true);
-  }
-
-  d3.select("#play").on("click", play);
+  d3.select("#play").on("click", () => (reduce ? (reset(false), finish(D.scenarios[cur])) : play()));
   d3.select("#reset").on("click", () => reset(true));
-  cur = D.scenarios.findIndex(s => s.key === (new URLSearchParams(location.search).get("s") || "collapse"));
-  if (cur < 0) cur = 1;
-  render();
-  const q = new URLSearchParams(location.search);
-  if (q.get("autoplay") === "1" || q.get("final") === "1") play();
-  if (q.get("final") === "1") { if (tl) tl.kill(); finish(D.scenarios[cur]); }   // jump to the end state
   let rt;
-  addEventListener("resize", () => {
-    clearTimeout(rt);
-    rt = setTimeout(() => {
-      const s = D.scenarios[cur], wasPlayed = played;
-      if (tl) tl.kill();
-      drawRuns(s);
-      if (wasPlayed) finish(s); else { d3.select("#score-cand").text("?"); pending(); }
-    }, 150);
-  });
-  const openTask = q.get("task"), openBroad = q.get("why") === "broad";
-  if (openTask) showTask(D.scenarios[cur], D.scenarios[cur].tasks.find(t => t.name === openTask));
-  if (openBroad) showBroad(D.scenarios[cur]);
+  addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => {
+    const s = D.scenarios[cur], was = played; drawBars(s); if (was) finish(s); else reset(false); }, 150); });
+
+  const q = new URLSearchParams(location.search);
+  const want = D.scenarios.findIndex(s => s.key === (q.get("s") || "collapse"));
+  cur = want < 0 ? 1 : want;
+  render();
+  if (q.get("final") === "1") finish(D.scenarios[cur]);
+  else if (q.get("autoplay") === "1") play();
+  if (q.get("task")) drill(D.scenarios[cur], D.scenarios[cur].tasks.find(t => t.name === q.get("task")), q.get("final") === "1");
+  if (q.get("why") === "broad") showBroad(D.scenarios[cur]);
 })();
 </script>
 </body>
