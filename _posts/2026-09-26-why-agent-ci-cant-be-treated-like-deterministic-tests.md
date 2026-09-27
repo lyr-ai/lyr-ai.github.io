@@ -83,6 +83,12 @@ points, but not evenly: most of it was one task collapsing completely. Averaged
 over the suite, a total failure of one capability looks like a moderate,
 uncertain drop.
 
+<figure>
+  <a href="/agentseism/explorer/?s=collapse"><img src="/assets/img/agentseism-explorer-preview.png" alt="A measurement plate of seven capabilities, each with eight runs on main and eight on the pull request. Standing marks are successful runs; dots on the floor are failures. Six capabilities barely change. Checkout goes from eight standing marks on main to eight red dots on the pull request, 8/8 to 0/8. Beneath, a seismic trace shows small tremors across the suite and then a sharp fall at checkout. The average fell 14 points; checkout fell 100." loading="lazy"></a>
+  <figcaption><b>Figure 3.</b> The average fell 14 points. One capability disappeared.
+  <a href="/agentseism/explorer/?s=collapse"><b>▶ Explore what happened</b></a>: an interactive version of the <code>seism demo</code> collapse scenario, where every mark is one run.</figcaption>
+</figure>
+
 This isn't hypothetical for us. The first version of our own check measured only
 the suite-wide average, and on a real agent it passed a change that cut success
 from 0.92 to 0.52, with two tasks collapsing. The statistics were computed
