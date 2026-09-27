@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototype A · focus + collapse dots</title><link rel="stylesheet" href="proto-style.css"></head>
+<body><main>
+<header><div class="kicker">Prototype A · focus + collapse dots · storyboard</div><h1>What the average hides</h1>
+<p>Each act would be one step of the animation. No statistics on this layer.</p></header>
+<div id="frames"></div></main>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="data.js"></script><script src="proto-common.js"></script>
+<script>
+const { S, css, count, short, hero, frame, contrast, gates } = P;
+const W = 860, ROW = 40, NAME = 110, DOT = 20;
+// rows: which runs to draw, and how bright each row is
+function rows(el, { showPR, dim, collapsed }) {
+  const H = 26 + S.tasks.length * ROW;
+  const svg = d3.select(el).append("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%");
+  svg.append("text").attr("x", NAME).attr("y", 14).attr("font-size", 12).attr("fill", css("--muted")).text("MAIN");
+  if (showPR) svg.append("text").attr("x", NAME + 8 * DOT + 70).attr("y", 14).attr("font-size", 12).attr("fill", css("--muted")).text("THIS PR");
+  S.tasks.forEach((t, r) => {
+    const y = 26 + r * ROW, focus = t === hero, op = dim && !focus ? 0.22 : 1;
+    const g = svg.append("g").attr("opacity", op);
+    if (focus && !showPR) g.append("rect").attr("x", 0).attr("y", y - 4).attr("width", W).attr("height", ROW - 4).attr("rx", 6).attr("fill", css("--band"));
+    g.append("text").attr("x", 8).attr("y", y + 20).attr("font-size", 15).attr("font-family", css("--mono")).attr("font-weight", focus ? 700 : 400).attr("fill", css("--text")).text(short(t.name));
+    [...t.baseline].forEach((o, i) => g.append("circle").attr("cx", NAME + i * DOT + 8).attr("cy", y + 15).attr("r", 6.5)
+      .attr("fill", o === "1" ? css("--green") : "none").attr("stroke", o === "1" ? css("--green") : css("--muted")).attr("stroke-width", 1.6));
+    g.append("text").attr("x", NAME + 8 * DOT + 14).attr("y", y + 20).attr("font-size", 13).attr("font-family", css("--mono")).attr("fill", css("--muted")).text(`${count(t.baseline)}/8`);
+    if (showPR) {
+      const x0 = NAME + 8 * DOT + 78;
+      const src = focus && !collapsed ? t.baseline : t.candidate;
+      [...src].forEach((o, i) => g.append("circle").attr("cx", x0 + i * DOT).attr("cy", y + 15).attr("r", 6.5)
+        .attr("fill", o === "1" ? css("--green") : focus ? css("--red") : "none")
+        .attr("stroke", o === "1" ? css("--green") : focus ? css("--red") : css("--muted")).attr("stroke-width", 1.6)
+        .attr("opacity", focus && !collapsed ? 0.35 : 1));
+      g.append("text").attr("x", x0 + 8 * DOT + 6).attr("y", y + 20).attr("font-size", 13).attr("font-family", css("--mono"))
+        .attr("fill", focus && collapsed ? css("--red") : css("--muted")).attr("font-weight", focus && collapsed ? 700 : 400)
+        .text(focus && !collapsed ? "running…" : `${count(t.candidate)}/8`);
+    }
+  });
+}
+// the zoomed collapse: two bands, eight runs falling from one to the other
+function collapse(el) {
+  const H = 250, x0 = 190;
+  const svg = d3.select(el).append("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%");
+  const band = (y, label, col) => {
+    svg.append("rect").attr("x", 20).attr("y", y).attr("width", W - 40).attr("height", 64).attr("rx", 8).attr("fill", col);
+    svg.append("text").attr("x", W - 36).attr("y", y + 38).attr("text-anchor", "end").attr("font-size", 13)
+      .attr("font-family", css("--mono")).attr("fill", css("--muted")).text(label);
+  };
+  band(10, "CAPABILITY WORKING", css("--band")); band(176, "CAPABILITY FAILED", css("--red-bg"));
+  svg.append("text").attr("x", 40).attr("y", 48).attr("font-size", 18).attr("font-weight", 700).attr("font-family", css("--mono")).text(short(hero.name));
+  [...hero.baseline].forEach((o, i) => {
+    const x = x0 + i * 46;
+    svg.append("circle").attr("cx", x).attr("cy", 42).attr("r", 11).attr("fill", "none").attr("stroke", css("--green")).attr("stroke-dasharray", "3 3");
+    svg.append("line").attr("x1", x).attr("x2", x).attr("y1", 62).attr("y2", 180).attr("stroke", css("--red")).attr("stroke-width", 1.5).attr("opacity", 0.5);
+    svg.append("path").attr("d", `M${x - 5},${172} L${x},${182} L${x + 5},${172}`).attr("fill", "none").attr("stroke", css("--red")).attr("stroke-width", 1.5).attr("opacity", 0.7);
+    svg.append("circle").attr("cx", x).attr("cy", 208).attr("r", 11).attr("fill", css("--red"));
+  });
+  svg.append("text").attr("x", x0 + 8 * 46 + 4).attr("y", 50).attr("font-size", 16).attr("font-family", css("--mono")).attr("fill", css("--muted")).text(`${count(hero.baseline)}/8`);
+  svg.append("text").attr("x", x0 + 8 * 46 + 4).attr("y", 215).attr("font-size", 20).attr("font-weight", 800).attr("font-family", css("--mono")).attr("fill", css("--red")).text(`${count(hero.candidate)}/8`);
+}
+rows(frame("Act 1 · main", `On main, ${short(hero.name)} works every time.`), { showPR: false });
+rows(frame("Act 2 · the PR runs", `Six capabilities barely move. Look at ${short(hero.name)}.`), { showPR: true, dim: true, collapsed: false });
+collapse(frame("Act 3 · the collapse (zoomed in)", `All eight runs fall from working to failed.`));
+{ const f = frame("Act 4 · zoom back out", "What the average hides"); rows(f, { showPR: true, dim: false, collapsed: true }); contrast(f); }
+{ const f = frame("Act 5 · the decision", "AgentSeism agrees with what you just saw."); gates(f);
+  f.insertAdjacentHTML("beforeend", `<p class="note">Explore the evidence ↓ (statistics layer, on demand)</p>`); }
+</script></body></html>

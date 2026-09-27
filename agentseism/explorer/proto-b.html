@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototype B · capability bars</title><link rel="stylesheet" href="proto-style.css"></head>
+<body><main>
+<header><div class="kicker">Prototype B · capability bars · storyboard</div><h1>What the average hides</h1>
+<p>Overview first: one bar per capability. The individual runs appear only on click. No statistics on this layer.</p></header>
+<div id="frames"></div></main>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="data.js"></script><script src="proto-common.js"></script>
+<script>
+const { S, css, count, short, pct, hero, frame, contrast, gates } = P;
+const W = 860, ROW = 42, NAME = 110, CELL = 22, GAP = 3, BAR = 8 * (CELL + GAP);
+function bar(g, x, y, str, { red, ghost } = {}) {
+  [...str].forEach((o, i) => g.append("rect").attr("x", x + i * (CELL + GAP)).attr("y", y).attr("width", CELL).attr("height", 22).attr("rx", 3)
+    .attr("fill", o === "1" ? css("--green") : red ? css("--red-bg") : css("--faint"))
+    .attr("stroke", red && o !== "1" ? css("--red") : "none").attr("stroke-width", 1.2)
+    .attr("opacity", ghost ? 0.35 : 1));
+}
+function bars(el, { showPR, dim }) {
+  const H = 26 + S.tasks.length * ROW;
+  const svg = d3.select(el).append("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%");
+  svg.append("text").attr("x", NAME).attr("y", 14).attr("font-size", 12).attr("fill", css("--muted")).text("MAIN");
+  if (showPR) svg.append("text").attr("x", NAME + BAR + 110).attr("y", 14).attr("font-size", 12).attr("fill", css("--muted")).text("THIS PR");
+  S.tasks.forEach((t, r) => {
+    const y = 26 + r * ROW, focus = t === hero;
+    const g = svg.append("g").attr("opacity", dim && !focus ? 0.25 : 1);
+    g.append("text").attr("x", 8).attr("y", y + 17).attr("font-size", 15).attr("font-family", css("--mono")).attr("font-weight", focus && showPR ? 700 : 400).attr("fill", css("--text")).text(short(t.name));
+    bar(g, NAME, y, t.baseline);
+    g.append("text").attr("x", NAME + BAR + 10).attr("y", y + 17).attr("font-size", 13).attr("font-family", css("--mono")).attr("fill", css("--muted")).text(`${count(t.baseline)}/8`);
+    if (showPR) {
+      g.append("text").attr("x", NAME + BAR + 62).attr("y", y + 17).attr("font-size", 15).attr("fill", css("--muted")).text("→");
+      bar(g, NAME + BAR + 110, y, t.candidate, { red: focus });
+      g.append("text").attr("x", NAME + 2 * BAR + 120).attr("y", y + 17).attr("font-size", 13).attr("font-family", css("--mono"))
+        .attr("fill", focus ? css("--red") : css("--muted")).attr("font-weight", focus ? 800 : 400).text(`${count(t.candidate)}/8`);
+    }
+  });
+}
+// overall vs the collapsed capability, as two bars on the same 0-100 scale
+function versus(el) {
+  const H = 150, x0 = 150, L = 560;
+  const svg = d3.select(el).append("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%");
+  const pair = (y, label, a, b, hot) => {
+    svg.append("text").attr("x", 8).attr("y", y + 16).attr("font-size", 15).attr("font-family", css("--mono")).attr("font-weight", 700)
+      .attr("fill", hot ? css("--red") : css("--text")).text(label);
+    svg.append("rect").attr("x", x0).attr("y", y).attr("width", L).attr("height", 10).attr("rx", 5).attr("fill", css("--faint"));
+    svg.append("rect").attr("x", x0).attr("y", y).attr("width", L * a).attr("height", 10).attr("rx", 5).attr("fill", css("--green")).attr("opacity", 0.35);
+    svg.append("rect").attr("x", x0).attr("y", y + 16).attr("width", L).attr("height", 10).attr("rx", 5).attr("fill", css("--faint"));
+    svg.append("rect").attr("x", x0).attr("y", y + 16).attr("width", Math.max(0.5, L * b)).attr("height", 10).attr("rx", 5).attr("fill", hot ? css("--red") : css("--green"));
+    svg.append("text").attr("x", x0 + L + 12).attr("y", y + 20).attr("font-size", 15).attr("font-family", css("--mono")).attr("font-weight", 700)
+      .attr("fill", hot ? css("--red") : css("--text")).text(`${pct(a)} → ${pct(b)}`);
+  };
+  pair(20, "overall", S.score.baseline, S.score.candidate, false);
+  pair(90, short(hero.name), count(hero.baseline) / 8, count(hero.candidate) / 8, true);
+  svg.append("text").attr("x", x0).attr("y", 140).attr("font-size", 12).attr("fill", css("--muted")).text("faint = main · solid = this PR");
+}
+// drill-down: the eight runs behind the collapsed bar
+function runs(el) {
+  const H = 110, x0 = 150;
+  const svg = d3.select(el).append("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%");
+  svg.append("text").attr("x", 8).attr("y", 30).attr("font-size", 13).attr("fill", css("--muted")).text("main");
+  svg.append("text").attr("x", 8).attr("y", 90).attr("font-size", 13).attr("fill", css("--muted")).text("this PR");
+  [...hero.baseline].forEach((o, i) => {
+    const x = x0 + i * 44;
+    svg.append("circle").attr("cx", x).attr("cy", 25).attr("r", 10).attr("fill", css("--green"));
+    svg.append("line").attr("x1", x).attr("x2", x).attr("y1", 39).attr("y2", 72).attr("stroke", css("--red")).attr("opacity", 0.45);
+    svg.append("circle").attr("cx", x).attr("cy", 85).attr("r", 10).attr("fill", css("--red"));
+  });
+}
+bars(frame("Act 1 · main", "Seven capabilities, eight runs each, on main."), { showPR: false });
+bars(frame("Act 2 · the PR runs", `${short(hero.name)} drains completely. The rest barely move.`), { showPR: true, dim: true });
+{ const f = frame("Act 3 · what the average hides", "The average fell a little. One capability fell to zero."); versus(f); contrast(f); }
+runs(frame(`On click · ${short(hero.name)}'s runs`, "Every run that worked on main fails on this PR."));
+{ const f = frame("Act 4 · the decision", "AgentSeism agrees with what you just saw."); gates(f);
+  f.insertAdjacentHTML("beforeend", `<p class="note">Explore the evidence ↓ (statistics layer, on demand)</p>`); }
+</script></body></html>
