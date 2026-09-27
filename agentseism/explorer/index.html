@@ -156,9 +156,9 @@ footer a, #detail a { color: var(--accent); }
                  "INSUFFICIENT EVIDENCE": "INSUFFICIENT", FIRED: "FIRED", WARNING: "WARNING",
                  "NOT MONITORED": "NOTMON" };
   const MEANING = {
-    PASS: "Neither gate found sufficient evidence of a material regression. The check is green.",
-    REGRESSION: "The evidence shows this PR made the agent worse. The check fails.",
-    INSUFFICIENT_EVIDENCE: "Not a pass, and not a regression: too little evidence to decide. The check fails until there are more runs or tasks.",
+    PASS: "No material regression found. The check is green.",
+    REGRESSION: "This PR made the agent worse. The check fails.",
+    INSUFFICIENT_EVIDENCE: "Too little evidence to decide. Not a pass.",
   };
   let cur = 0, played = false, tl = null;
 
@@ -223,7 +223,7 @@ footer a, #detail a { color: var(--accent); }
   // where a candidate dot ends up, and how it looks
   function finalStyle(t, i) {
     const was = t.baseline[i] === "1", now = t.candidate[i] === "1", lost = was && !now;
-    return { now, lost, r: now ? G.R_OK : G.R_FAIL,
+    return { now, lost, r: now ? G.R_OK : lost && t.gate === "FIRED" ? G.R_OK + 0.8 : G.R_FAIL,
              fill: now ? css("--green") : lost ? css("--red") : css("--panel"),
              stroke: now ? css("--green") : lost ? css("--red") : css("--muted") };
   }
@@ -244,35 +244,24 @@ footer a, #detail a { color: var(--accent); }
   function reveal(s) {
     const b = s.broad, c = s.capability, line = `−${Math.round(b.threshold * 100)} pts`;
     d3.select("#verdict").html(`<span class="pill ${PILL[s.verdict]}">${LABEL[s.verdict]}</span><p>${MEANING[s.verdict]}</p>`);
-    let lead, sub;
-    if (b.status === "INSUFFICIENT EVIDENCE") {
-      lead = "Too few tasks or runs to judge the whole suite.";
-      sub = "It needs at least 5 tasks with 3 runs each.";
-    } else if (b.status === "PASS") {
-      lead = `No suite-wide drop cleared the ${line} block line.`;
-      sub = b.effect < 0
-        ? `Scores did fall (${pts(b.effect)}; interval ${pts(b.ci[0])} to ${pts(b.ci[1])}), but the interval doesn't sit entirely past the line.`
-        : `Change ${pts(b.effect)}; interval ${pts(b.ci[0])} to ${pts(b.ci[1])}.`;
-    } else {
-      lead = `The whole suite is confidently worse by more than ${line.slice(1)}.`;
-      sub = `Change ${pts(b.effect)}; interval ${pts(b.ci[0])} to ${pts(b.ci[1])}.`;
-    }
+    const lead = b.status === "INSUFFICIENT EVIDENCE" ? "Too few tasks or runs to judge the suite."
+      : b.status === "PASS" ? `No suite-wide drop cleared ${line}.`
+      : `The whole suite is worse by more than ${line.slice(1)}.`;
     d3.select("#gate-broad").html(gateHead("Broad reliability", b.status) +
-      `<p style="color:var(--text)">${lead}</p><p>${sub}</p><svg id="mini" width="100%" height="46"></svg>
-      <button class="linkish" id="why-broad">Why? See the evidence →</button>`);
+      `<p style="color:var(--text)">${lead}</p><svg id="mini" width="100%" height="46"></svg>
+      <button class="linkish" id="why-broad">Why? →</button>`);
     miniInterval(b);
     d3.select("#why-broad").on("click", () => showBroad(s));
 
     const capState = c.fired.length ? "REGRESSION" : c.eligible.length ? "PASS" : "NOT MONITORED";
-    const chips = [...c.fired.map(t => [t, "FIRED"]), ...c.warnings.map(t => [t, "WARNING"])]
-      .map(([t, k]) => `<span class="chip ${k}" data-task="${t}">${t} · ${k === "FIRED" ? "collapsed" : "warning"}</span>`).join("");
-    const capLead = c.fired.length ? `${c.fired.length === 1 ? "A task" : "Tasks"} that reliably worked stopped working.`
-      : c.eligible.length ? "No reliable task collapsed." : "Not enough runs to judge any single task.";
-    const cp = c.eligible.length
-      ? `${c.eligible.length} of ${c.k} tasks reliable enough to watch (baseline ≥ ${Math.ceil(c.eligibility * s.trials)}/${s.trials}).`
-      : `Needs ${c.min_trials} runs per side; this PR has ${s.trials}.`;
+    const row = (name, k) => { const t = s.tasks.find(x => x.name === name);
+      return `<span class="chip ${k}" data-task="${name}">${name} ${count(t.baseline)}/${s.trials} → ${count(t.candidate)}/${s.trials}</span>`; };
+    const capLead = c.fired.length ? `${c.fired.join(", ")} stopped working.`
+      : c.eligible.length ? "No reliable task collapsed."
+      : `Needs ${c.min_trials} runs per task; this PR has ${s.trials}.`;
+    const chips = [...c.fired.map(t => row(t, "FIRED")), ...c.warnings.map(t => row(t, "WARNING"))].join("");
     d3.select("#gate-cap").html(gateHead("Capability regression", capState) +
-      `<p style="color:var(--text)">${capLead}</p><p>${cp}</p><div>${chips}</div>`);
+      `<p style="color:var(--text)">${capLead}</p><div>${chips}</div>`);
     d3.selectAll("#gate-cap .chip").on("click", function () {
       const t = s.tasks.find(x => x.name === this.dataset.task); showTask(s, t);
     });
@@ -338,6 +327,7 @@ footer a, #detail a { color: var(--accent); }
       });
       tl.to(g.select("rect.bg").node(), { attr: { fill: css("--red-bg") }, duration: 0.6 * T }, t0 + 0.6 * T);
       tl.to(g.select("text.count").node(), { opacity: 1, duration: 0.3 * T }, t0 + 0.9 * T);
+      tl.set(g.select("text.count").node(), { attr: { fill: css("--red"), "font-weight": 700 } }, t0 + 0.9 * T);
     });
     if (falls.length)
       tl.to(counter, { v: s.score.candidate, duration: 0.9 * T, ease: "power2.in", onUpdate: show }, t0 + 0.1 * T);
@@ -362,7 +352,9 @@ footer a, #detail a { color: var(--accent); }
         d3.select(this).attr("cy", laneY(r, f.now)).attr("r", f.r).style("fill", f.fill).style("stroke", f.stroke)
           .style("opacity", 1);
       });
-      g.select("text.count").attr("opacity", 1);
+      g.select("text.count").attr("opacity", 1)
+        .attr("fill", t.gate === "FIRED" ? css("--red") : css("--muted"))
+        .attr("font-weight", t.gate === "FIRED" ? 700 : 400);
       const bg = t.gate === "FIRED" ? css("--red-bg") : t.gate === "WARNING" ? css("--amber-bg") : "transparent";
       g.select("rect.bg").attr("fill", bg);
     });
