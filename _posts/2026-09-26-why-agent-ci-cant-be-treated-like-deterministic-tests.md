@@ -1,5 +1,6 @@
 ---
 title: "Why agent CI can't be treated like deterministic tests"
+date: 2026-09-26 17:56:13 -0700
 description: >-
   Run the same agent twice and you get two different results. So what should a
   pull request check believe? A 25-point drop that wasn't enough evidence on
