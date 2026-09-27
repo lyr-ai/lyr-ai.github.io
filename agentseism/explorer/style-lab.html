@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Style Lab · AgentSeism</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body { margin: 0; background: #e9e6e0; font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: #2a2826; }
+main { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
+.lab { font: 600 12px "IBM Plex Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: #6b665e; }
+h1 { font: 600 26px Newsreader, Georgia, serif; margin: 6px 0 4px; }
+.intro { color: #5c574f; max-width: 70ch; line-height: 1.5; margin: 0 0 24px; }
+.variant { margin: 0 0 34px; }
+.variant > .name { font: 600 12px "IBM Plex Mono", monospace; letter-spacing: .06em; text-transform: uppercase; color: #6b665e; margin-bottom: 8px; }
+.plate { border-radius: 4px; overflow: hidden; }
+svg { display: block; width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<main>
+  <div class="lab">AgentSeism · Style Lab · not published</div>
+  <h1>One scene, three visual languages</h1>
+  <p class="intro">The same Act 3 of the explorer (overall −14 vs checkout −100), with the same numbers from the
+    engine and the same interaction. Only the visual language changes. The question isn't which one is prettiest,
+    but which one looks like <i>you</i>.</p>
+  <section class="variant"><div class="name">A · Scientific journal: paper, serif, rules, leader lines</div><div class="plate" id="A"></div></section>
+  <section class="variant"><div class="name">B · Seismic instrument: trace, grid, measurement ticks</div><div class="plate" id="B"></div></section>
+  <section class="variant"><div class="name">C · Data art: negative space, oversized numbers, minimal glyph</div><div class="plate" id="C"></div></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="data.js"></script>
+<script>
+const S = window.EXPLORER_DATA.scenarios.find(s => s.key === "collapse");
+const count = s => s.split("1").length - 1;
+const hero = S.tasks.find(t => t.gate === "FIRED");
+const n = S.trials;
+const base = Math.round(S.score.baseline * 100), cand = Math.round(S.score.candidate * 100);
+const overall = cand - base, heroDrop = Math.round((count(hero.candidate) - count(hero.baseline)) / n * 100);
+const SERIF = "Newsreader, Georgia, serif", MONO = "'IBM Plex Mono', ui-monospace, monospace", SANS = "-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif";
+const neg = v => (v < 0 ? "−" : "+") + Math.abs(v);            // a real minus sign, not a hyphen
+const thesisA = `The average fell ${-overall} points.`, thesisB = "One capability disappeared.";
+
+// A seismic trace built from the data, not drawn for effect: each run's deviation from
+// its task's mean on main is a small tremor; the collapsed capability, placed last, falls
+// by its actual change, to scale, and stays down.
+function trace(x0, x1, y0, tremor, fall) {
+  const order = [...S.tasks.filter(t => t !== hero), hero];
+  const pts = [], per = order.length * n + 6, dx = (x1 - x0) / per;
+  let x = x0;
+  order.forEach(t => {
+    const m = count(t.baseline) / n;
+    [...t.baseline].forEach(o => { pts.push([x, y0 - ((o === "1" ? 1 : 0) - m) * tremor]); x += dx; });
+  });
+  const change = (count(hero.candidate) - count(hero.baseline)) / n;   // -1
+  const cut = pts.length;
+  for (let k = 0; k < 6; k++) { pts.push([x, y0 - change * fall * Math.min(1, (k + 1) / 2)]); x += dx; }
+  return { pts, cut, order, dx };
+}
+
+// ── A · Scientific journal ─────────────────────────────────────────────
+(() => {
+  const c = { paper: "#f5f0e6", ink: "#2a2826", muted: "#7a7368", rule: "#d8cfbf", sage: "#4f6f58", cinnabar: "#b8432c" };
+  const W = 920, H = 430;
+  const s = d3.select("#A").append("svg").attr("viewBox", `0 0 ${W} ${H}`);
+  s.append("rect").attr("width", W).attr("height", H).attr("fill", c.paper);
+  s.append("text").attr("x", 56).attr("y", 52).attr("font-family", MONO).attr("font-size", 11).attr("letter-spacing", "0.12em").attr("fill", c.muted).text("FIG. 1 — WHAT THE AVERAGE HIDES");
+  s.append("text").attr("x", 56).attr("y", 104).attr("font-family", SERIF).attr("font-size", 38).attr("fill", c.ink).text(thesisA);
+  s.append("text").attr("x", 56).attr("y", 150).attr("font-family", SERIF).attr("font-size", 38).attr("font-style", "italic").attr("fill", c.cinnabar).text(thesisB);
+  const x = d3.scaleLinear().domain([0, 100]).range([220, 820]);
+  const scale = (y, label, a, b, hot) => {
+    s.append("line").attr("x1", x(0)).attr("x2", x(100)).attr("y1", y).attr("y2", y).attr("stroke", c.rule);
+    [0, 25, 50, 75, 100].forEach(v => s.append("line").attr("x1", x(v)).attr("x2", x(v)).attr("y1", y - 4).attr("y2", y + 4).attr("stroke", c.rule));
+    s.append("text").attr("x", 56).attr("y", y + 5).attr("font-family", MONO).attr("font-size", 14).attr("fill", hot ? c.cinnabar : c.ink).text(label);
+    s.append("line").attr("x1", x(a)).attr("x2", x(b) + (b < a ? 8 : -8)).attr("y1", y).attr("y2", y).attr("stroke", hot ? c.cinnabar : c.sage).attr("stroke-width", 2);
+    s.append("circle").attr("cx", x(a)).attr("cy", y).attr("r", 6).attr("fill", c.paper).attr("stroke", hot ? c.cinnabar : c.sage).attr("stroke-width", 1.6);
+    s.append("circle").attr("cx", x(b)).attr("cy", y).attr("r", 6).attr("fill", hot ? c.cinnabar : c.sage);
+    s.append("text").attr("x", x(b)).attr("y", y - 14).attr("text-anchor", "middle").attr("font-family", MONO).attr("font-size", 12).attr("fill", c.muted).text(`${b}%`);
+    s.append("text").attr("x", x(a)).attr("y", y - 14).attr("text-anchor", "middle").attr("font-family", MONO).attr("font-size", 12).attr("fill", c.muted).text(`${a}%`);
+  };
+  scale(222, "overall", base, cand, false);
+  scale(302, hero.name, 100, 0, true);
+  // leader-line annotations
+  s.append("path").attr("d", `M${x((base + cand) / 2)},${230} v22 h${-40}`).attr("fill", "none").attr("stroke", c.muted).attr("stroke-width", 0.8);
+  s.append("text").attr("x", x((base + cand) / 2) - 46).attr("y", 256).attr("text-anchor", "end").attr("font-family", SERIF).attr("font-style", "italic").attr("font-size", 16).attr("fill", c.ink).text(`${neg(overall)} points, averaged over seven tasks`);
+  s.append("path").attr("d", `M${x(50)},${310} v36 h60`).attr("fill", "none").attr("stroke", c.cinnabar).attr("stroke-width", 0.8);
+  s.append("text").attr("x", x(50) + 66).attr("y", 350).attr("font-family", SERIF).attr("font-style", "italic").attr("font-size", 16).attr("fill", c.cinnabar).text(`${neg(heroDrop)} points: a capability collapse`);
+  s.append("line").attr("x1", 56).attr("x2", W - 56).attr("y1", 384).attr("y2", 384).attr("stroke", c.rule);
+  s.append("text").attr("x", 56).attr("y", 408).attr("font-family", SERIF).attr("font-size", 14).attr("fill", c.muted)
+    .text(`Task success on main (○) and on the pull request (●). ${S.tasks.length} tasks, ${n} runs each; same scale for both rows.`);
+})();
+
+// ── B · Seismic instrument ─────────────────────────────────────────────
+(() => {
+  const c = { bg: "#0f1417", grid: "#1b242a", ink: "#dfe6e3", muted: "#7e8c8a", teal: "#6fb3a5", verm: "#ff6b4a" };
+  const W = 920, H = 430;
+  const s = d3.select("#B").append("svg").attr("viewBox", `0 0 ${W} ${H}`);
+  s.append("rect").attr("width", W).attr("height", H).attr("fill", c.bg);
+  for (let gx = 40; gx < W; gx += 40) s.append("line").attr("x1", gx).attr("x2", gx).attr("y1", 70).attr("y2", 300).attr("stroke", c.grid);
+  for (let gy = 70; gy <= 300; gy += 23) s.append("line").attr("x1", 40).attr("x2", W - 40).attr("y1", gy).attr("y2", gy).attr("stroke", c.grid);
+  s.append("text").attr("x", 40).attr("y", 44).attr("font-family", MONO).attr("font-size", 12).attr("letter-spacing", "0.1em").attr("fill", c.muted)
+    .text(`AGENTSEISM · TRACE · ${S.tasks.length} TASKS × ${n} RUNS · MAIN → PR`);
+  const y0 = 140, { pts, cut, order, dx } = trace(60, W - 250, y0, 14, 120);
+  const line = d3.line().curve(d3.curveMonotoneX);
+  s.append("path").attr("d", line(pts.slice(0, cut + 1))).attr("fill", "none").attr("stroke", c.teal).attr("stroke-width", 1.4);
+  s.append("path").attr("d", line(pts.slice(cut))).attr("fill", "none").attr("stroke", c.verm).attr("stroke-width", 2.2);
+  order.forEach((t, k) => s.append("text").attr("x", 60 + k * n * dx).attr("y", 322).attr("font-family", MONO).attr("font-size", 10)
+    .attr("fill", t === hero ? c.verm : c.muted).text(t.name.split("-")[0]));
+  const rx = W - 210;
+  s.append("text").attr("x", rx).attr("y", 118).attr("font-family", MONO).attr("font-size", 11).attr("letter-spacing", ".1em").attr("fill", c.muted).text("OVERALL");
+  s.append("text").attr("x", rx).attr("y", 156).attr("font-family", MONO).attr("font-size", 38).attr("font-weight", 500).attr("fill", c.ink).text(neg(overall));
+  s.append("text").attr("x", rx).attr("y", 218).attr("font-family", MONO).attr("font-size", 11).attr("letter-spacing", ".1em").attr("fill", c.verm).text(hero.name.toUpperCase());
+  s.append("text").attr("x", rx).attr("y", 270).attr("font-family", MONO).attr("font-size", 54).attr("font-weight", 600).attr("fill", c.verm).text(neg(heroDrop));
+  // measurement ticks: the hero's eight runs, standing on main, flat on the PR
+  const tx = 60;
+  s.append("text").attr("x", tx).attr("y", 362).attr("font-family", MONO).attr("font-size", 10).attr("fill", c.muted).text("MAIN");
+  s.append("text").attr("x", tx + 220).attr("y", 362).attr("font-family", MONO).attr("font-size", 10).attr("fill", c.muted).text("PR");
+  [...hero.baseline].forEach((o, i) => s.append("line").attr("x1", tx + 44 + i * 14).attr("x2", tx + 44 + i * 14).attr("y1", 372).attr("y2", 346).attr("stroke", c.teal).attr("stroke-width", 2));
+  [...hero.candidate].forEach((o, i) => s.append("circle").attr("cx", tx + 250 + i * 14).attr("cy", 370).attr("r", 2).attr("fill", c.verm));
+  s.append("text").attr("x", 40).attr("y", 408).attr("font-family", SERIF).attr("font-size", 22).attr("fill", c.ink)
+    .text(`Small tremors are normal. ${hero.name} is a structural fall.`);
+})();
+
+// ── C · Data art ───────────────────────────────────────────────────────
+(() => {
+  const c = { bg: "#fbfaf7", ink: "#1d1c1a", muted: "#a39e95", cinnabar: "#c4452d" };
+  const W = 920, H = 430;
+  const s = d3.select("#C").append("svg").attr("viewBox", `0 0 ${W} ${H}`);
+  s.append("rect").attr("width", W).attr("height", H).attr("fill", c.bg);
+  s.append("text").attr("x", 70).attr("y", 250).attr("font-family", SERIF).attr("font-size", 120).attr("fill", c.muted).text(neg(overall));
+  s.append("text").attr("x", 76).attr("y", 286).attr("font-family", MONO).attr("font-size", 12).attr("letter-spacing", ".14em").attr("fill", c.muted).text("THE AVERAGE");
+  s.append("text").attr("x", 360).attr("y", 280).attr("font-family", SERIF).attr("font-size", 230).attr("fill", c.cinnabar).text(neg(heroDrop));
+  s.append("text").attr("x", 372).attr("y", 318).attr("font-family", MONO).attr("font-size", 12).attr("letter-spacing", ".14em").attr("fill", c.cinnabar).text(hero.name.toUpperCase());
+  // the glyph: eight thin marks standing, then eight points on the floor
+  [...hero.baseline].forEach((o, i) => s.append("line").attr("x1", 76 + i * 9).attr("x2", 76 + i * 9).attr("y1", 70).attr("y2", 104).attr("stroke", c.ink).attr("stroke-width", 1.2));
+  s.append("text").attr("x", 160).attr("y", 102).attr("font-family", SERIF).attr("font-size", 26).attr("fill", c.muted).text("→");
+  [...hero.candidate].forEach((o, i) => s.append("circle").attr("cx", 200 + i * 9).attr("cy", 103).attr("r", 1.8).attr("fill", c.cinnabar));
+  s.append("text").attr("x", 76).attr("y", 380).attr("font-family", SERIF).attr("font-style", "italic").attr("font-size", 22).attr("fill", c.ink)
+    .text(`${thesisA} ${thesisB}`);
+})();
+</script>
+</body>
+</html>

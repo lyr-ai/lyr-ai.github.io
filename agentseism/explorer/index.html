@@ -290,11 +290,16 @@ footer a, #evidence a { color: var(--accent); }
       });
     }, null, t2 + 0.1 * T);
     // 4–5 s: the decision
-    const t3 = t2 + 1.2 * T;
+    const t3 = t2 + 1.7 * T;                      // hold the gap a beat: this is the moment it lands
     tl.call(() => { drawDecision(s, w); d3.select("#decision").classed("hidden", false).style("opacity", 0); }, null, t3);
     tl.to("#decision", { opacity: 1, duration: 0.5 * T }, t3 + 0.01);
-    tl.call(() => { played = true; svg.selectAll("g.cap").style("opacity", 1); }, null, t3 + 0.8 * T);
+    tl.call(() => { played = true; }, null, t3 + 0.8 * T);
+    if (hero) tl.to(svg.selectAll("g.cap").nodes().filter(n => n.dataset.task !== hero.name), { opacity: REST, duration: 0.6 * T }, t3);
   }
+
+  // after the story, the other capabilities stay a step back so a still image keeps its focus;
+  // ?rest=full restores them, for comparison
+  const REST = new URLSearchParams(location.search).get("rest") === "full" ? 1 : 0.55;
 
   // the end state, drawn directly (for ?final=1, resize, reduced motion)
   function finish(s) {
@@ -302,7 +307,7 @@ footer a, #evidence a { color: var(--accent); }
     if (tl) tl.kill();
     svg.select("text.prlabel").attr("opacity", 1);
     s.tasks.forEach(t => {
-      const g = svg.select(`g.cap[data-task="${t.name}"]`).style("opacity", 1);
+      const g = svg.select(`g.cap[data-task="${t.name}"]`).style("opacity", w.hero && t !== w.hero ? REST : 1);
       g.select("g.pr").attr("opacity", 1);
       g.selectAll("rect.p").each(function () {
         const e = cellEnd(t, +this.dataset.i);
