@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Regression Explorer · AgentSeism</title>
+<meta name="description" content="See what an average hides: play a pull request against a stochastic agent and watch AgentSeism's two gates decide.">
+<meta property="og:title" content="AgentSeism Regression Explorer">
+<meta property="og:description" content="91% → 77% looks like a moderate drop. Play the PR and watch one capability collapse.">
+<meta property="og:image" content="https://lyr-ai.github.io/assets/img/agentseism-social-preview.png">
+<style>
+:root {
+  --bg: #fbfbfa; --panel: #ffffff; --text: #1f2328; --muted: #59636e; --faint: #eaeef2;
+  --border: #d0d7de; --green: #1a7f37; --green-bg: #dafbe1; --red: #cf222e; --red-bg: #ffebe9;
+  --amber: #9a6700; --amber-bg: #fff8c5; --accent: #0969da;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --panel: #111820; --text: #e6edf3; --muted: #9198a1; --faint: #21262d;
+    --border: #30363d; --green: #3fb950; --green-bg: #12261e; --red: #f85149; --red-bg: #2d1215;
+    --amber: #d29922; --amber-bg: #2b2111; --accent: #4493f8;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); }
+main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 48px; }
+header .kicker { font: 600 12px var(--mono); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+header h1 { font-size: 28px; margin: 6px 0 4px; }
+header p { color: var(--muted); margin: 0 0 18px; max-width: 70ch; line-height: 1.5; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.tabs button, .controls button, .linkish {
+  font: 500 14px var(--sans); border: 1px solid var(--border); background: var(--panel);
+  color: var(--text); border-radius: 999px; padding: 7px 14px; cursor: pointer;
+}
+.tabs button[aria-selected="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 20px; align-items: start; }
+@media (max-width: 920px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+#runs { display: block; }
+.card { min-width: 0; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+.story { color: var(--muted); margin: 0 0 12px; line-height: 1.5; }
+.score { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 6px; }
+.score .label { color: var(--muted); font-size: 14px; }
+.score .num { font: 700 30px var(--mono); }
+.score .delta { font: 500 15px var(--mono); color: var(--muted); }
+.controls { display: flex; gap: 8px; margin: 10px 0 4px; }
+.controls .primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.legend { display: flex; gap: 16px; color: var(--muted); font-size: 12px; margin: 8px 0 0; flex-wrap: wrap; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+svg text { font-family: var(--sans); }
+.row-name { cursor: pointer; }
+.row-name:hover { text-decoration: underline; }
+.pill { display: inline-block; font: 700 13px var(--sans); padding: 3px 10px; border-radius: 999px; border: 1px solid; }
+.pill.PASS { color: var(--green); background: var(--green-bg); border-color: var(--green); }
+.pill.REGRESSION, .pill.FIRED { color: var(--red); background: var(--red-bg); border-color: var(--red); }
+.pill.INSUFFICIENT, .pill.WARNING { color: var(--amber); background: var(--amber-bg); border-color: var(--amber); }
+.pill.PENDING, .pill.NOTMON { color: var(--muted); background: var(--faint); border-color: var(--border); }
+.side h3 { font-size: 13px; margin: 0 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.side .gate { margin-bottom: 14px; }
+.side .gate + .gate { border-top: 1px solid var(--border); padding-top: 14px; }
+.gate .head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+.gate .head strong { font-size: 15px; }
+.gate p { margin: 4px 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.verdict { text-align: center; padding: 12px 0 4px; }
+.verdict .pill { font-size: 18px; padding: 6px 16px; }
+.verdict p { color: var(--muted); font-size: 13px; margin: 8px 0 0; line-height: 1.45; }
+.linkish { font-size: 12px; padding: 4px 10px; margin-top: 6px; }
+.chip { cursor: pointer; font: 600 12px var(--mono); border-radius: 6px; padding: 2px 7px; margin: 2px 4px 2px 0; display: inline-block; border: 1px solid; }
+.chip.FIRED { color: var(--red); border-color: var(--red); background: var(--red-bg); }
+.chip.WARNING { color: var(--amber); border-color: var(--amber); background: var(--amber-bg); }
+#detail { margin-top: 20px; }
+#detail h2 { font-size: 18px; margin: 0 0 6px; }
+#detail p { color: var(--muted); line-height: 1.5; margin: 6px 0; max-width: 75ch; }
+#detail .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+#detail .stat { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+#detail .stat .k { color: var(--muted); font-size: 12px; }
+#detail .stat .v { font: 700 18px var(--mono); margin-top: 2px; }
+.muted { color: var(--muted); }
+footer { margin-top: 28px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+footer a, #detail a { color: var(--accent); }
+.sr { position: absolute; left: -9999px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="kicker">AgentSeism · Regression Explorer</div>
+    <h1>What the average hides</h1>
+    <p>An agent is stochastic: run it twice and some tasks come out differently. Pick a pull request, press play, and watch
+      every run move. Then see how AgentSeism's two gates decide what the change means.</p>
+  </header>
+
+  <div class="tabs" role="tablist" id="tabs"></div>
+
+  <div class="grid">
+    <section class="card" aria-labelledby="scenario-title">
+      <h2 id="scenario-title" class="sr"></h2>
+      <p class="story" id="story"></p>
+      <div class="score">
+        <span class="label">Task success</span>
+        <span class="num" id="score-base"></span>
+        <span class="num muted">→</span>
+        <span class="num" id="score-cand">?</span>
+        <span class="delta" id="score-delta"></span>
+      </div>
+      <div class="controls">
+        <button class="primary" id="play">▶ Play the PR</button>
+        <button id="reset">↺ Reset</button>
+      </div>
+      <div class="legend">
+        <span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="var(--green)"/></svg>run succeeded</span>
+        <span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="none" stroke="var(--muted)" stroke-width="1.5"/></svg>run failed</span>
+        <span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="var(--red)"/></svg>failed on the PR, succeeded before</span>
+        <span>click a task for its evidence</span>
+      </div>
+      <svg id="runs" role="img" aria-label="Runs per task, baseline and candidate"></svg>
+    </section>
+
+    <aside class="card side" aria-live="polite">
+      <h3>AgentSeism check</h3>
+      <div class="verdict" id="verdict"></div>
+      <div class="gate" id="gate-broad"></div>
+      <div class="gate" id="gate-cap"></div>
+    </aside>
+  </div>
+
+  <section class="card" id="detail" aria-live="polite"></section>
+
+  <footer>
+    <p><b>What this is.</b> These are the three <code>seism demo</code> scenarios. Every run's outcome is written out in the
+      scenario, not drawn at random, and every number and verdict on this page comes from AgentSeism's own decision engine,
+      including the bootstrap distribution. It shows how the check reasons. It is not evidence that the check works.
+      For that, see the <a href="https://github.com/lyr-ai/agentseism/blob/master/analysis/ci_v1/stageC/RESULTS.md">pre-registered
+      real-agent study</a> and the <a href="https://github.com/lyr-ai/agentseism-example/pulls">two public example PRs</a>.</p>
+    <p><a href="https://github.com/lyr-ai/agentseism">github.com/lyr-ai/agentseism</a> ·
+      <a href="/why-agent-ci-cant-be-treated-like-deterministic-tests/">Why agent CI can't be treated like deterministic tests</a></p>
+  </footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="data.js"></script>
+<script>
+(() => {
+  const D = window.EXPLORER_DATA;
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const pct = x => `${Math.round(x * 100)}%`;
+  const pts = x => `${x >= 0 ? "+" : "−"}${Math.abs(Math.round(x * 100))} pts`;
+  const LABEL = { PASS: "✓ PASS", REGRESSION: "✕ REGRESSION", INSUFFICIENT_EVIDENCE: "? NEED EVIDENCE",
+                  "INSUFFICIENT EVIDENCE": "? NEED EVIDENCE" };
+  const PILL = { PASS: "PASS", REGRESSION: "REGRESSION", INSUFFICIENT_EVIDENCE: "INSUFFICIENT",
+                 "INSUFFICIENT EVIDENCE": "INSUFFICIENT", FIRED: "FIRED", WARNING: "WARNING",
+                 "NOT MONITORED": "NOTMON" };
+  const MEANING = {
+    PASS: "Neither gate found sufficient evidence of a material regression. The check is green.",
+    REGRESSION: "The evidence shows this PR made the agent worse. The check fails.",
+    INSUFFICIENT_EVIDENCE: "Not a pass, and not a regression: too little evidence to decide. The check fails until there are more runs or tasks.",
+  };
+  let cur = 0, played = false, tl = null;
+
+  // ── tabs ─────────────────────────────────────────────────────────────
+  const tabNames = { noise: "Unchanged candidate", collapse: "One capability collapses", insufficient: "Too little evidence" };
+  const tabs = d3.select("#tabs").selectAll("button").data(D.scenarios).join("button")
+    .attr("role", "tab").text(s => tabNames[s.key])
+    .on("click", (_, s) => { cur = D.scenarios.indexOf(s); render(); });
+
+  // ── main plot ────────────────────────────────────────────────────────
+  const svg = d3.select("#runs");
+  const ROW = 46, NAME_W = 150, DOT = 19, GAP = 44, TOP = 30;
+
+  function layout(s) {
+    const n = s.trials, block = Math.max(n * DOT, 150);          // a column never gets narrower than its label
+    const width = NAME_W + block + GAP + block + 110;
+    const bx = i => NAME_W + i * DOT + 8;
+    const cx = i => NAME_W + block + GAP + i * DOT + 8;
+    return { n, width, bx, cx, height: TOP + s.tasks.length * ROW + 8 };
+  }
+  const laneY = (r, ok) => TOP + r * ROW + (ok ? 15 : 32);
+
+  function drawRuns(s) {
+    const L = layout(s);
+    svg.attr("viewBox", `0 0 ${L.width} ${L.height}`).attr("width", "100%")
+      .style("max-width", `${Math.round(L.width * 1.15)}px`).selectAll("*").remove();
+    svg.append("text").attr("x", L.bx(0) - 3).attr("y", 14).attr("font-size", 12).attr("fill", css("--muted")).text("main (baseline)");
+    svg.append("text").attr("x", L.cx(0) - 3).attr("y", 14).attr("font-size", 12).attr("fill", css("--muted")).text("this PR");
+    s.tasks.forEach((t, r) => {
+      const g = svg.append("g").attr("class", "row").attr("data-task", t.name);
+      g.append("rect").attr("class", "bg").attr("x", 0).attr("y", TOP + r * ROW + 2).attr("width", L.width)
+        .attr("height", ROW - 4).attr("rx", 8).attr("fill", "transparent");
+      g.append("text").attr("class", "row-name").attr("x", 8).attr("y", TOP + r * ROW + 28).attr("font-size", 14)
+        .attr("font-family", css("--mono")).attr("fill", css("--text")).text(t.name)
+        .on("click", () => showTask(s, t));
+      g.append("line").attr("x1", L.bx(0) - 8).attr("x2", L.cx(L.n - 1) + 8)
+        .attr("y1", TOP + r * ROW + 24).attr("y2", TOP + r * ROW + 24).attr("stroke", css("--faint"));
+      [...t.baseline].forEach((o, i) => dot(g, L.bx(i), laneY(r, o === "1"), o === "1" ? "ok" : "fail"));
+      [...t.baseline].forEach((o, i) => dot(g, L.cx(i), laneY(r, o === "1"), o === "1" ? "ok" : "fail")
+        .attr("class", "cand").attr("data-i", i));
+      g.append("text").attr("class", "count").attr("x", L.cx(L.n - 1) + 22).attr("y", TOP + r * ROW + 28)
+        .attr("font-size", 13).attr("font-family", css("--mono")).attr("fill", css("--muted"))
+        .attr("opacity", 0).text(`${t.baseline.split("1").length - 1}/${s.trials} → ${t.candidate.split("1").length - 1}/${s.trials}`);
+    });
+  }
+  function dot(g, x, y, kind) {
+    return g.append("circle").attr("cx", x).attr("cy", y).attr("r", kind === "ok" ? 6 : 5.2)
+      .style("fill", kind === "ok" ? css("--green") : "none")
+      .style("stroke", kind === "ok" ? css("--green") : css("--muted")).style("stroke-width", 1.6);
+  }
+
+  // ── gates and verdict ────────────────────────────────────────────────
+  function pending() {
+    d3.select("#verdict").html(`<span class="pill PENDING">not run yet</span><p>Press play to run the PR.</p>`);
+    d3.select("#gate-broad").html(gateHead("Broad reliability", null) + `<p>Did the suite as a whole get worse by at least 10 points?</p>`);
+    d3.select("#gate-cap").html(gateHead("Capability regression", null) + `<p>Did a task that reliably worked stop working?</p>`);
+  }
+  function gateHead(name, status) {
+    const cls = status ? PILL[status] : "PENDING";
+    const txt = status ? (status === "NOT MONITORED" ? "NOT MONITORED" : LABEL[status] || status) : "—";
+    return `<div class="head"><strong>${name}</strong><span class="pill ${cls}">${txt}</span></div>`;
+  }
+
+  function reveal(s) {
+    const b = s.broad, c = s.capability;
+    d3.select("#verdict").html(`<span class="pill ${PILL[s.verdict]}">${LABEL[s.verdict]}</span><p>${MEANING[s.verdict]}</p>`);
+    let bp;
+    if (b.status === "INSUFFICIENT EVIDENCE") bp = `Too few tasks or runs to judge the whole suite (needs at least 5 tasks and 3 runs each).`;
+    else if (b.status === "PASS") bp = `Change ${pts(b.effect)}, interval ${pts(b.ci[0])} to ${pts(b.ci[1])}. It fires only if the effect and the whole interval are past −${Math.round(b.threshold * 100)} pts.`;
+    else bp = `Change ${pts(b.effect)}, with the whole interval past −${Math.round(b.threshold * 100)} pts.`;
+    d3.select("#gate-broad").html(gateHead("Broad reliability", b.status) + `<p>${bp}</p><svg id="mini" width="100%" height="46"></svg>
+      <button class="linkish" id="why-broad">Why? See the evidence →</button>`);
+    miniInterval(b);
+    d3.select("#why-broad").on("click", () => showBroad(s));
+
+    const capState = c.fired.length ? "REGRESSION" : c.eligible.length ? "PASS" : "NOT MONITORED";
+    const chips = [...c.fired.map(t => [t, "FIRED"]), ...c.warnings.map(t => [t, "WARNING"])]
+      .map(([t, k]) => `<span class="chip ${k}" data-task="${t}">${t} · ${k === "FIRED" ? "fired" : "warning"}</span>`).join("");
+    const cp = c.eligible.length
+      ? `${c.eligible.length} of ${c.k} tasks reliable enough to monitor (baseline ≥ ${Math.ceil(c.eligibility * s.trials)}/${s.trials}).`
+      : `Needs ${c.min_trials} runs per side to judge a single task; this PR has ${s.trials}.`;
+    d3.select("#gate-cap").html(gateHead("Capability regression", capState) + `<p>${cp}</p><div>${chips}</div>`);
+    d3.selectAll("#gate-cap .chip").on("click", function () {
+      const t = s.tasks.find(x => x.name === this.dataset.task); showTask(s, t);
+    });
+  }
+
+  function miniInterval(b) {
+    const w = document.querySelector("#mini").getBoundingClientRect().width || 290;
+    const x = d3.scaleLinear().domain([-0.65, 0.2]).range([10, w - 10]).clamp(true);
+    const m = d3.select("#mini");
+    m.append("line").attr("x1", x(-0.65)).attr("x2", x(0.2)).attr("y1", 22).attr("y2", 22).attr("stroke", css("--faint")).attr("stroke-width", 6).attr("stroke-linecap", "round");
+    m.append("line").attr("x1", x(-b.threshold)).attr("x2", x(-b.threshold)).attr("y1", 10).attr("y2", 34).attr("stroke", css("--red")).attr("stroke-dasharray", "3 3");
+    m.append("text").attr("x", x(-b.threshold)).attr("y", 45).attr("text-anchor", "middle").attr("font-size", 10).attr("fill", css("--red")).text(`−${Math.round(b.threshold * 100)} pts`);
+    m.append("line").attr("x1", x(0)).attr("x2", x(0)).attr("y1", 14).attr("y2", 30).attr("stroke", css("--muted"));
+    m.append("text").attr("x", x(0)).attr("y", 45).attr("text-anchor", "middle").attr("font-size", 10).attr("fill", css("--muted")).text("0");
+    const col = b.status === "REGRESSION" ? css("--red") : b.status === "PASS" ? css("--green") : css("--amber");
+    m.append("line").attr("x1", x(b.ci[0])).attr("x2", x(b.ci[1])).attr("y1", 22).attr("y2", 22).attr("stroke", col).attr("stroke-width", 6).attr("stroke-linecap", "round");
+    m.append("circle").attr("cx", x(b.effect)).attr("cy", 22).attr("r", 5).attr("fill", css("--panel")).attr("stroke", col).attr("stroke-width", 2);
+  }
+
+  // ── play ─────────────────────────────────────────────────────────────
+  function play() {
+    const s = D.scenarios[cur];
+    if (tl) tl.kill();
+    reset(false);
+    const T = reduce ? 0 : 1;
+    tl = gsap.timeline({ onComplete: () => { played = true; reveal(s); highlight(s); } });
+    const counter = { v: s.score.baseline };
+    tl.to(counter, { v: s.score.candidate, duration: 2.2 * T, ease: "power1.inOut",
+      onUpdate: () => d3.select("#score-cand").text(pct(counter.v)) }, 0);
+    s.tasks.forEach((t, r) => {
+      const g = svg.select(`g.row[data-task="${t.name}"]`);
+      g.selectAll("circle.cand").each(function () {
+        const i = +this.dataset.i, was = t.baseline[i] === "1", now = t.candidate[i] === "1";
+        const lost = was && !now;
+        tl.to(this, { attr: { cy: laneY(r, now), r: now ? 6 : 5.2 },
+          fill: now ? css("--green") : lost ? css("--red") : "rgba(0,0,0,0)",
+          stroke: now ? css("--green") : lost ? css("--red") : css("--muted"),
+          duration: (lost ? 0.9 : 0.5) * T, ease: lost ? "bounce.out" : "power2.out" }, (0.12 * r + 0.03 * i) * T);
+      });
+      tl.to(g.select("text.count").node(), { opacity: 1, duration: 0.3 * T }, (0.12 * r + 0.5) * T);
+    });
+  }
+  function highlight(s) {
+    s.tasks.forEach(t => {
+      const bg = t.gate === "FIRED" ? css("--red-bg") : t.gate === "WARNING" ? css("--amber-bg") : "transparent";
+      svg.select(`g.row[data-task="${t.name}"] rect.bg`).attr("fill", bg);
+    });
+    const d = s.score.candidate - s.score.baseline;
+    d3.select("#score-delta").text(`(${pts(d)})`);
+  }
+  function reset(full = true) {
+    const s = D.scenarios[cur];
+    if (full && tl) tl.kill();
+    played = false;
+    drawRuns(s);
+    d3.select("#score-cand").text("?"); d3.select("#score-delta").text("");
+    pending();
+    if (full) d3.select("#detail").html(intro(s));
+  }
+
+  // ── detail: one task ─────────────────────────────────────────────────
+  function squares(str, fail) {
+    return [...str].map(o => `<span style="display:inline-block;width:13px;height:13px;margin-right:3px;border-radius:3px;
+      background:${o === "1" ? "var(--green)" : "var(--faint)"};border:1px solid ${o === "1" ? "var(--green)" : "var(--border)"}"></span>`).join("");
+  }
+  function showTask(s, t) {
+    const c = s.capability, b = t.baseline.split("1").length - 1, a = t.candidate.split("1").length - 1, n = s.trials;
+    const drop = (b - a) / n;
+    let verdict;
+    if (!played) verdict = "Press play to run the PR first.";
+    else if (t.gate === "FIRED") verdict = `<b style="color:var(--red)">Fired.</b> A task that reliably worked (${b}/${n}) collapsed to ${a}/${n}. The drop clears the ${Math.round(c.drop_threshold * 100)}-point bar, and a one-sided exact test gives p = ${t.p.toFixed(4)}, below the per-task limit ${c.limit.toFixed(4)} (5% split across all ${c.k} tasks in the suite).`;
+    else if (t.gate === "WARNING") verdict = `<b style="color:var(--amber)">Warning.</b> A noticeable drop, but the evidence doesn't clear the per-task limit (p = ${t.p.toFixed(4)} vs ${c.limit.toFixed(4)}). It is flagged, and it doesn't block.`;
+    else if (t.gate === "PASS") verdict = `<b style="color:var(--green)">Pass.</b> Monitored, and no material drop (p = ${t.p.toFixed(4)}).`;
+    else verdict = `<b>Not monitored.</b> ${t.why_not_monitored ? t.why_not_monitored.charAt(0).toUpperCase() + t.why_not_monitored.slice(1) + "." : ""}`;
+    d3.select("#detail").html(`<h2><code>${t.name}</code></h2>
+      <div class="stats">
+        <div class="stat"><div class="k">main (baseline)</div><div class="v">${b}/${n}</div><div>${squares(t.baseline)}</div></div>
+        <div class="stat"><div class="k">this PR</div><div class="v">${played ? a + "/" + n : "?"}</div><div>${played ? squares(t.candidate) : ""}</div></div>
+        <div class="stat"><div class="k">observed drop</div><div class="v">${played ? Math.round(drop * 100) + " pts" : "?"}</div><div class="muted">capability bar: ${Math.round(c.drop_threshold * 100)} pts</div></div>
+        <div class="stat"><div class="k">evidence</div><div class="v">${played && t.p != null ? "p = " + t.p.toFixed(4) : "—"}</div><div class="muted">limit ≤ ${c.limit.toFixed(4)}</div></div>
+      </div><p>${verdict}</p>`);
+  }
+
+  // ── detail: the broad gate ───────────────────────────────────────────
+  function showBroad(s) {
+    const b = s.broad;
+    d3.select("#detail").html(`<h2>Broad reliability: why ${b.status === "PASS" ? "it passed" : b.status === "REGRESSION" ? "it fired" : "it couldn't decide"}</h2>
+      <p>The broad gate asks about the <b>suite</b>, so its unit of evidence is the task, not the run. Top: each task's change
+      from main to this PR. Bottom: the ${b.boot_means.length.toLocaleString()} resampled averages AgentSeism draws by
+      picking tasks with replacement. The shaded band is the 95% interval. It blocks only if the whole band sits past
+      the −${Math.round(b.threshold * 100)} pts line.</p>
+      <svg id="strip" width="100%" height="120"></svg><svg id="hist" width="100%" height="190"></svg>`);
+    const w = document.querySelector("#strip").getBoundingClientRect().width || 700;
+    const x = d3.scaleLinear().domain([-1.05, 0.3]).range([40, w - 20]);
+    const st = d3.select("#strip");
+    const entries = Object.entries(b.per_task).map(([k, v]) => [k.split("/").pop().replace(".json", ""), v]);
+    st.append("g").attr("transform", "translate(0,90)").call(d3.axisBottom(x).ticks(6).tickFormat(v => `${Math.round(v * 100)}`))
+      .call(g => g.selectAll("text").attr("fill", css("--muted"))).call(g => g.selectAll("line,path").attr("stroke", css("--border")));
+    st.append("text").attr("x", w - 20).attr("y", 115).attr("text-anchor", "end").attr("font-size", 11).attr("fill", css("--muted")).text("change per task (pts) →");
+    const bins = {};
+    entries.forEach(([k, v]) => {
+      const key = Math.round(v * 100); bins[key] = (bins[key] || 0) + 1;
+      const y = 78 - (bins[key] - 1) * 14;
+      st.append("circle").attr("cx", x(v)).attr("cy", y).attr("r", 6)
+        .attr("fill", v <= -0.5 ? css("--red") : v < 0 ? css("--amber") : css("--green"))
+        .append("title").text(`${k}: ${pts(v)}`);
+      if (v <= -0.5) st.append("text").attr("x", x(v) + 10).attr("y", y + 4).attr("font-size", 12)
+        .attr("font-family", css("--mono")).attr("fill", css("--red")).text(k);
+    });
+    const hw = document.querySelector("#hist").getBoundingClientRect().width || 700;
+    const hx = d3.scaleLinear().domain([-0.65, 0.2]).range([40, hw - 20]);
+    const binsH = d3.bin().domain(hx.domain()).thresholds(hx.ticks(60))(b.boot_means);
+    const hy = d3.scaleLinear().domain([0, d3.max(binsH, d => d.length)]).range([150, 34]);
+    const h = d3.select("#hist");
+    const col = b.status === "REGRESSION" ? css("--red") : b.status === "PASS" ? css("--green") : css("--amber");
+    h.append("rect").attr("x", hx(b.ci[0])).attr("width", Math.max(2, hx(b.ci[1]) - hx(b.ci[0]))).attr("y", 26).attr("height", 124).attr("fill", col).attr("opacity", 0.12);
+    h.selectAll("rect.bar").data(binsH).join("rect").attr("class", "bar").attr("x", d => hx(d.x0) + 0.5)
+      .attr("width", d => Math.max(0, hx(d.x1) - hx(d.x0) - 1)).attr("y", d => hy(d.length)).attr("height", d => 150 - hy(d.length))
+      .attr("fill", css("--muted")).attr("opacity", 0.55);
+    h.append("line").attr("x1", hx(-b.threshold)).attr("x2", hx(-b.threshold)).attr("y1", 18).attr("y2", 150).attr("stroke", css("--red")).attr("stroke-dasharray", "4 4");
+    h.append("text").attr("x", hx(-b.threshold) - 4).attr("y", 12).attr("text-anchor", "end").attr("font-size", 11).attr("fill", css("--red")).text(`block line −${Math.round(b.threshold * 100)} pts`);
+    h.append("text").attr("x", hx(b.ci[1]) + 4).attr("y", 12).attr("font-size", 11).attr("fill", col).text(`95% interval ${pts(b.ci[0])} to ${pts(b.ci[1])}`);
+    h.append("g").attr("transform", "translate(0,150)").call(d3.axisBottom(hx).ticks(8).tickFormat(v => `${Math.round(v * 100)}`))
+      .call(g => g.selectAll("text").attr("fill", css("--muted"))).call(g => g.selectAll("line,path").attr("stroke", css("--border")));
+    h.append("text").attr("x", hw - 20).attr("y", 184).attr("text-anchor", "end").attr("font-size", 11).attr("fill", css("--muted")).text("resampled average change (pts) →");
+    const why = b.status === "PASS" && s.capability.fired.length
+      ? "The interval reaches past the line on the left, but its right end stays short of it: resamples that leave out the collapsed task look almost unchanged. That is the average hiding one task. The capability gate looks at each task directly, and it fired."
+      : b.status === "PASS" ? "Most of the band sits near zero. Nothing here looks like a suite-wide drop."
+      : b.status === "REGRESSION" ? "The whole band is past the line: the suite as a whole is confidently worse."
+      : "With this few tasks and runs, the band is too wide to say anything either way.";
+    d3.select("#detail").append("p").html(why);
+  }
+
+  function intro(s) {
+    return `<h2>${tabNames[s.key]}</h2><p>${s.story} Press <b>▶ Play the PR</b>. Afterwards, click a task name or a gate to see its evidence.</p>`;
+  }
+
+  function render() {
+    const s = D.scenarios[cur];
+    tabs.attr("aria-selected", (_, i) => i === cur);
+    d3.select("#scenario-title").text(tabNames[s.key]);
+    d3.select("#story").text(`${s.tasks.length} tasks × ${s.trials} runs per side.`);
+    d3.select("#score-base").text(pct(s.score.baseline));
+    reset(true);
+  }
+
+  d3.select("#play").on("click", play);
+  d3.select("#reset").on("click", () => reset(true));
+  cur = D.scenarios.findIndex(s => s.key === (new URLSearchParams(location.search).get("s") || "collapse"));
+  if (cur < 0) cur = 1;
+  render();
+  const q = new URLSearchParams(location.search);
+  if (q.get("autoplay") === "1" || q.get("final") === "1") play();
+  if (q.get("final") === "1" && tl) tl.progress(1);           // jump to the end state
+  const openTask = q.get("task"), openBroad = q.get("why") === "broad";
+  if (openTask) showTask(D.scenarios[cur], D.scenarios[cur].tasks.find(t => t.name === openTask));
+  if (openBroad) showBroad(D.scenarios[cur]);
+})();
+</script>
+</body>
+</html>
