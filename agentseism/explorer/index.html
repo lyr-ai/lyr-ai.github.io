@@ -48,8 +48,9 @@ svg { display: block; }
 #climax { margin-top: 30px; }
 .nums { display: flex; align-items: flex-end; gap: 44px; flex-wrap: wrap; }
 .nums .k { font: 500 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
-.nums .small { font: 400 96px/0.9 var(--serif); color: var(--muted); }
-.nums .huge { font: 400 190px/0.8 var(--serif); color: var(--cinnabar); letter-spacing: -.02em; }
+.nums .small { font: 400 44px/1 var(--serif); color: var(--muted); }
+.nums .huge { font: 400 72px/1 var(--serif); color: var(--cinnabar); letter-spacing: -.01em; }
+.nums .u { font-size: .42em; margin-left: .15em; }
 .nums .hot .k { color: var(--cinnabar); }
 .thesis { font: 400 30px/1.25 var(--serif); margin: 26px 0 0; max-width: 26ch; }
 .thesis em { color: var(--cinnabar); }
@@ -68,7 +69,7 @@ svg { display: block; }
 #evidence .final { color: var(--ink); font-weight: 600; font-size: 20px; }
 #evidence .support { font-size: 14px; }
 @media (max-width: 560px) {
-  h1 { font-size: 32px; } .nums .small { font-size: 64px; } .nums .huge { font-size: 120px; } .thesis { font-size: 24px; }
+  h1 { font-size: 32px; } .nums .small { font-size: 36px; } .nums .huge { font-size: 54px; } .thesis { font-size: 24px; }
 }
 .hidden { display: none; }
 footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--rule); font: 400 14px/1.6 var(--serif); color: var(--muted); }
@@ -92,7 +93,6 @@ code { font-family: var(--mono); font-size: .9em; }
   </div>
 
   <svg id="bars" role="img" aria-label="Each capability's runs on main and on this pull request"></svg>
-  <svg id="trace" role="img" aria-label="Seismic trace: small tremors for ordinary variation, a fall for a collapse"></svg>
   <p class="traceNote" id="traceNote"></p>
 
   <section id="climax" class="hidden" aria-live="polite">
@@ -129,7 +129,7 @@ code { font-family: var(--mono); font-size: .9em; }
   const neg = v => `${v < 0 ? "−" : v > 0 ? "+" : ""}${Math.abs(Math.round(v))}`;       // a real minus sign
   const short = n => n.split("-")[0];
   const TAB = { noise: "Unchanged candidate", collapse: "One capability collapses", insufficient: "Too little evidence" };
-  const REST = q.get("rest") === "full" ? 1 : 0.5;
+  const REST = q.get("rest") === "full" ? 1 : 0.35;
   let cur = 1, played = false, tl = null, G = {};
 
   // ── the words of each act ────────────────────────────────────────────
@@ -162,7 +162,10 @@ code { font-family: var(--mono); font-size: .9em; }
     g.BAR = s.trials * g.STEP;
     const col = Math.max(g.BAR, 80) + 36;
     g.mainX = g.NAME; g.prX = g.NAME + col + g.GAP;
-    g.width = g.prX + col + g.TAG; g.height = 26 + s.tasks.length * g.ROW;
+    g.width = g.prX + col + g.TAG;
+    g.traceTop = 26 + s.tasks.length * g.ROW + (c ? 10 : 18);   // the trace sits under the plate, in the same figure
+    g.traceH = c ? 78 : 112;
+    g.height = g.traceTop + g.traceH;
     return g;
   }
   const floorY = r => 24 + r * G.ROW + G.TALL + 4;
@@ -214,7 +217,6 @@ code { font-family: var(--mono); font-size: .9em; }
   // ── the seismic trace, from the runs themselves ──────────────────────
   // tremor = each run's deviation from its task's mean on main; the collapsed capability,
   // read last, falls by its actual change, to scale, and stays down
-  const tr = d3.select("#trace");
   function tracePoints(s, W, y0, amp, fall) {
     const hero = s.tasks.find(t => t.gate === "FIRED");
     const order = hero ? [...s.tasks.filter(t => t !== hero), hero] : s.tasks;
@@ -230,8 +232,9 @@ code { font-family: var(--mono); font-size: .9em; }
     return { pts, cut, hero };
   }
   function drawTrace(s, stage) {
-    const W = G.width, H = G.compact ? 70 : 96, y0 = G.compact ? 22 : 28, amp = G.compact ? 7 : 10, fall = G.compact ? 38 : 58;
-    tr.attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%").style("max-width", `${W * 1.1}px`).selectAll("*").remove();
+    svg.select("g.trace").remove(); svg.select("path.leader").remove(); svg.select("circle.leader-end").remove();
+    const W = G.width, y0 = G.compact ? 20 : 26, amp = G.compact ? 7 : 10, fall = G.compact ? 46 : 72;
+    const tr = svg.append("g").attr("class", "trace").attr("transform", `translate(0,${G.traceTop})`);
     tr.append("line").attr("x1", 10).attr("x2", W - 10).attr("y1", y0).attr("y2", y0).attr("stroke", css("--rule")).attr("stroke-dasharray", "1 4");
     const { pts, cut, hero } = tracePoints(s, W, y0, amp, fall);
     const line = d3.line().curve(d3.curveMonotoneX);
@@ -239,9 +242,21 @@ code { font-family: var(--mono); font-size: .9em; }
       .attr("stroke", css("--ink")).attr("stroke-width", 1.1).attr("opacity", 0.8);
     const b = tr.append("path").attr("class", "rupture").attr("d", line(pts.slice(cut))).attr("fill", "none")
       .attr("stroke", hero ? css("--cinnabar") : css("--ink")).attr("stroke-width", hero ? 2 : 1.1);
-    [a, b].forEach(p => { const L = p.node().getTotalLength(); p.attr("stroke-dasharray", `${L} ${L}`).attr("data-l", L)
-      .attr("stroke-dashoffset", stage === "full" ? 0 : stage === "tremor" && p === a ? 0 : L); });
-    return { a, b };
+    // a hairline from the collapsed row's count to where the trace falls: one event, seen twice
+    let lead = null;
+    if (hero) {
+      const r = s.tasks.indexOf(hero), yRow = floorY(r) - 4, xOut = G.prX + G.BAR + (G.compact ? 34 : 44);
+      // it points at the rupture, where the trace starts to fall; the fall itself is the trace's to show
+      const [rx] = pts[cut], xRail = Math.max(xOut + 8, rx), yEnd = G.traceTop + y0 - 7;
+      lead = svg.append("path").attr("class", "leader")
+        .attr("d", `M${xOut},${yRow} H${xRail} V${yEnd - 10} L${rx},${yEnd}`)
+        .attr("fill", "none").attr("stroke", css("--cinnabar")).attr("stroke-width", 0.8).attr("opacity", 0.75);
+      svg.append("circle").attr("class", "leader-end").attr("cx", rx).attr("cy", yEnd).attr("r", 2)
+        .attr("fill", css("--cinnabar")).attr("opacity", stage === "full" ? 0.75 : 0);
+    }
+    [a, b, lead].filter(Boolean).forEach(p => { const L = p.node().getTotalLength();
+      p.attr("stroke-dasharray", `${L} ${L}`).attr("stroke-dashoffset", stage === "full" ? 0 : stage === "tremor" && p === a ? 0 : L); });
+    return { a, b, lead };
   }
 
   // ── the climax (Act 3): the gap, oversized ───────────────────────────
@@ -249,8 +264,8 @@ code { font-family: var(--mono); font-size: .9em; }
     const hero = w.hero;
     const h = hero ? Math.round((count(hero.candidate) - count(hero.baseline)) / s.trials * 100) : null;
     d3.select("#nums").html(`
-      <div><div class="small" data-to="${w.o}">${final ? neg(w.o) : "0"}</div><div class="k">the average</div></div>
-      ${hero ? `<div class="hot"><div class="huge" data-to="${h}">${final ? neg(h) : "0"}</div><div class="k">${hero.name}</div></div>` : ""}`);
+      <div><div class="small"><span data-to="${w.o}">${final ? neg(w.o) : "0"}</span><span class="u">pts</span></div><div class="k">the average</div></div>
+      ${hero ? `<div class="hot"><div class="huge"><span data-to="${h}">${final ? neg(h) : "0"}</span><span class="u">pts</span></div><div class="k">${hero.name}</div></div>` : ""}`);
     d3.select("#thesis").html(w.thesis);
     // the same scale for both, ○ main → ● this PR
     const W = G.compact ? 420 : 820, x0 = G.compact ? 90 : 150, x = d3.scaleLinear().domain([0, 100]).range([x0, W - 30]);
@@ -306,7 +321,7 @@ code { font-family: var(--mono); font-size: .9em; }
     const T = reduce ? 0 : 1;
     tl = gsap.timeline();
     const say = (at, a, b) => tl.call(() => { d3.select("#caption").html(a); d3.select("#sub").text(b); }, null, at);
-    const { a: tremor, b: rupture } = drawTrace(s, "none");
+    const { a: tremor, b: rupture, lead } = drawTrace(s, "none");
     // tremor: the PR runs; ordinary runs settle quickly; the trace draws its small tremors
     say(0.5 * T, w.a2, w.a2s);
     tl.to(svg.select("text.prhead").node(), { opacity: 1, duration: 0.3 * T }, 0.5 * T);
@@ -332,7 +347,11 @@ code { font-family: var(--mono); font-size: .9em; }
         tl.call(() => g.select("text.pc").text(`${n - i - 1}/${n}`).attr("fill", css("--cinnabar")).attr("font-weight", 600), null, at + 0.25 * T);
       });
       tl.to(rupture.node(), { attr: { "stroke-dashoffset": 0 }, duration: 0.7 * T, ease: "power3.in" }, t2 + 0.5 * T);
-      tl.call(() => { g.select("text.tag").text("structural fall"); d3.select("#traceNote").html(`trace: tremors are ordinary run-to-run variation; the fall is ${hero.name}, to scale`); }, null, t2 + (0.4 + 0.1 * n) * T);
+      if (lead) {
+        tl.to(lead.node(), { attr: { "stroke-dashoffset": 0 }, duration: 0.8 * T, ease: "power1.inOut" }, t2 + (0.35 + 0.1 * n) * T);
+        tl.to(svg.select("circle.leader-end").node(), { opacity: 0.75, duration: 0.2 * T }, t2 + (1.1 + 0.1 * n) * T);
+      }
+      tl.call(() => { d3.select("#traceNote").html(`trace: tremors are ordinary run-to-run variation; the fall is ${hero.name}, to scale`); }, null, t2 + (0.4 + 0.1 * n) * T);
       t2 += (0.9 + 0.1 * n) * T;
     } else {
       say(t2 - 0.3 * T, w.a3, w.a3s);
@@ -364,7 +383,6 @@ code { font-family: var(--mono); font-size: .9em; }
       g.select("g.runs").attr("opacity", 1);
       g.selectAll("g.p").each(function () { settle(this, t, +this.dataset.i, false); });
       g.select("text.pc").text(`${count(t.candidate)}/${s.trials}`).attr("fill", hot ? css("--cinnabar") : css("--muted")).attr("font-weight", hot ? 600 : 400);
-      g.select("text.tag").text(hot ? "structural fall" : "");
       g.select("text.name").attr("fill", hot ? css("--cinnabar") : css("--ink")).attr("font-weight", hot ? 600 : 400);
     });
     drawTrace(s, "full");
