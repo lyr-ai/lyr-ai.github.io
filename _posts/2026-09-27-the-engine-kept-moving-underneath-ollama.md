@@ -1,23 +1,36 @@
 ---
 title: "The engine kept moving underneath Ollama"
 description: >-
-  Three years of Ollama's own history: everything a user relied on in 2023 still
-  works, while the inference engine underneath moved four times and ended split by
-  model format.
+  Ollama didn't choose between building and borrowing its inference engine. By 2026
+  it borrowed upstream llama.cpp for GGUF models and built its own MLX engine for
+  safetensors.
 image: /assets/img/systems-seen-ollama-engine.png
 series: Systems, Seen
 entry: "No. 2"
 date: 2026-09-27 17:30:00 -0700
 ---
 
-If you installed Ollama in the summer of 2023, you typed `ollama run` and a model name,
-and it worked. If you install it today, the same command is still there. Every
-command and API endpoint the 2023 user had is still there.
+Should a project build its own inference engine, or rely on an upstream one?
 
-Underneath, almost nothing stayed put. I read Ollama's full git history (5,796
-commits, from the first commit in June 2023 to late September 2026) to see what
-happened to the one component that does the actual work: the inference engine. It
-moved four times.
+Ollama's git history gives an unexpected answer: both.
+
+Over three years, Ollama moved from borrowing llama.cpp, to copying it into its own
+repository, to building its own GGML-based engine. Then, in May 2026, it deleted that
+engine and handed GGUF models to upstream llama.cpp's server.
+
+That sounds like a reversal. It wasn't quite.
+
+At the same time, Ollama was building another engine of its own, on Apple's MLX, and it
+kept that one. By September 2026 the stack had split:
+
+- **GGUF models → upstream llama.cpp.** Ollama borrows it.
+- **safetensors models → Ollama's MLX engine.** Ollama builds it.
+
+The interesting decision wasn't *build or borrow*. It was **where to own the engine**.
+
+What makes this easy to miss is that users never had to notice: every command and API
+endpoint a 2023 user had is still there. I read Ollama's full git history (5,796 commits,
+June 2023 to late September 2026) to see what happened underneath.
 
 <figure>
   <img src="/assets/img/systems-seen-ollama-engine.png" alt="A timeline from 2023 to 2026. On top, a green band labelled 'what users run' that only gets wider, at chat, OpenAI-compatible /v1, embed and accounts. Below, the inference engine moves between four levels of ownership: borrowed in a separate process, borrowed in-process, copied into the repo, and built by Ollama. It ends in 2026 split in two: upstream llama-server for GGUF models, and Ollama's own MLX engine for safetensors." loading="lazy">
