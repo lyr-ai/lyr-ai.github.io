@@ -16,81 +16,74 @@ title: lyr.ai
 </section>
 
 {%- comment -%}
-Posts are grouped by `series` (see _config.yml for the order and blurbs).
-Within a series they run oldest first, because the entries are numbered and
-meant to be read in order. Anything whose series is not declared falls
-through to "Elsewhere" so a new post is never silently hidden.
+Home: topic cards (one per declared series, see _config.yml) filter a single
+list of every post; the list can be sorted. Without JavaScript the cards are
+plain anchors and the full list shows, newest first, so nothing is hidden.
+A post whose series is not declared still appears in the list, under "Other".
 {%- endcomment -%}
 {%- assign declared = site.series | map: "name" %}
 
-<section class="posts">
+<section class="posts" id="writing">
   <h2>Writing</h2>
   {%- if site.posts.size == 0 %}
   <p class="empty">Nothing published yet.</p>
   {%- else %}
-  <nav class="series-nav" aria-label="Series">
-    <ul>
-      {%- for s in site.series %}
-      {%- assign in_series = site.posts | where: "series", s.name %}
-      {%- if in_series.size > 0 %}
-      <li><a href="#{{ s.name | slugify }}">{{ s.name }}</a><span class="count">{{ in_series.size }}</span></li>
-      {%- endif %}
-      {%- endfor %}
-    </ul>
-  </nav>
-  {%- endif %}
+
+  <ul class="topics" aria-label="Topics">
+    <li>
+      <a class="topic is-active" href="#writing" data-topic="all" aria-pressed="true">
+        <span class="topic-name">All writing</span>
+        <span class="topic-count">{{ site.posts.size }} posts</span>
+        <span class="topic-short">Every post, in one list.</span>
+      </a>
+    </li>
+    {%- for s in site.series %}
+    {%- assign in_series = site.posts | where: "series", s.name %}
+    {%- if in_series.size > 0 %}
+    <li>
+      <a class="topic" href="#{{ s.name | slugify }}" data-topic="{{ s.name | slugify }}" aria-pressed="false">
+        <span class="topic-name">{{ s.name }}</span>
+        <span class="topic-count">{{ in_series.size }} {% if in_series.size == 1 %}post{% else %}posts{% endif %} · <span class="nowrap">latest {{ in_series.first.date | date: "%b %-d" }}</span></span>
+        {%- if s.short %}<span class="topic-short">{{ s.short }}</span>{% endif %}
+      </a>
+    </li>
+    {%- endif %}
+    {%- endfor %}
+  </ul>
+
+  <div class="list-bar">
+    <p class="list-status" aria-live="polite"><span id="list-count">{{ site.posts.size }} posts</span><span id="list-blurb"></span></p>
+    <div class="sort" role="group" aria-label="Sort">
+      <span>Sort</span>
+      <button type="button" data-sort="new" aria-pressed="true">Newest</button>
+      <button type="button" data-sort="old" aria-pressed="false">Oldest</button>
+      <button type="button" data-sort="az" aria-pressed="false">A–Z</button>
+    </div>
+  </div>
 
   {%- for s in site.series %}
-  {%- assign in_series = site.posts | where: "series", s.name | reverse %}
-  {%- if in_series.size > 0 %}
-  <section class="series" id="{{ s.name | slugify }}">
-    <h3>{{ s.name }}</h3>
-    {%- if s.blurb %}<p class="dek series-blurb">{{ s.blurb }}</p>{% endif %}
-    <ul class="cards">
-      {%- for post in in_series %}
-      <li>
-        {%- if post.image %}
-        <a class="thumb" href="{{ post.url | relative_url }}" tabindex="-1" aria-hidden="true">
-          <img src="{{ post.image | relative_url }}" alt="" loading="lazy">
-        </a>
-        {%- endif %}
-        {%- if post.experiment %}<p class="eyebrow">Experiment {{ post.experiment }}</p>
-        {%- elsif post.entry %}<p class="eyebrow">{{ post.entry }}</p>{% endif %}
-        <a class="title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
-        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %Y" }}</time>
-        {%- if post.description %}<p class="dek">{{ post.description }}</p>{% endif -%}
-      </li>
-      {%- endfor %}
-    </ul>
-  </section>
-  {%- endif %}
+  <template class="topic-blurb" data-topic="{{ s.name | slugify }}">{{ s.blurb }}</template>
   {%- endfor %}
 
-  {%- assign shown_other_heading = false %}
-  {%- for post in site.posts %}
-  {%- unless declared contains post.series %}
-  {%- unless shown_other_heading %}
-  <section class="series" id="elsewhere">
-    <h3>Elsewhere</h3>
-    <ul class="cards">
-  {%- assign shown_other_heading = true %}
-  {%- endunless %}
-      <li>
-        {%- if post.image %}
-        <a class="thumb" href="{{ post.url | relative_url }}" tabindex="-1" aria-hidden="true">
-          <img src="{{ post.image | relative_url }}" alt="" loading="lazy">
-        </a>
-        {%- endif %}
-        {%- if post.series %}<p class="eyebrow">{{ post.series }}{% if post.entry %} · {{ post.entry }}{% endif %}</p>{% endif %}
+  <ul class="cards post-list">
+    {%- for post in site.posts %}
+    {%- if declared contains post.series %}{% assign topic = post.series | slugify %}{% else %}{% assign topic = "other" %}{% endif %}
+    <li data-topic="{{ topic }}" data-date="{{ post.date | date: '%s' }}" data-title="{{ post.title | downcase | escape }}">
+      {%- if post.image %}
+      <a class="thumb" href="{{ post.url | relative_url }}" tabindex="-1" aria-hidden="true">
+        <img src="{{ post.image | relative_url }}" alt="" loading="lazy">
+      </a>
+      {%- endif %}
+      <div class="post-text">
+        <p class="eyebrow">{{ post.series | default: "Other" }}{% if post.experiment %} · Experiment {{ post.experiment }}{% elsif post.entry %} · {{ post.entry }}{% endif %}</p>
         <a class="title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
-        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %Y" }}</time>
+        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>
         {%- if post.description %}<p class="dek">{{ post.description }}</p>{% endif -%}
-      </li>
-  {%- endunless %}
-  {%- endfor %}
-  {%- if shown_other_heading %}
-    </ul>
-  </section>
+      </div>
+    </li>
+    {%- endfor %}
+  </ul>
+  <p class="empty" id="list-empty" hidden>No posts in this topic yet.</p>
   {%- endif %}
 </section>
 
@@ -125,3 +118,5 @@ through to "Elsewhere" so a new post is never silently hidden.
     </li>
   </ul>
 </section>
+
+<script defer src="{{ '/assets/js/home.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>

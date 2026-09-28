@@ -4,6 +4,7 @@ description: >-
   On one coding benchmark, the same model gained 14 points in one harness and lost 13 in
   another. Benchmark numbers are partly system numbers, and changing the model means
   re-testing the harness.
+series: New tech, explained
 image: /assets/img/harness-same-model-two-harnesses.png
 date: 2026-09-27 18:30:00 -0700
 ---

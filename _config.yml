@@ -25,23 +25,41 @@ plugins:
 # "Elsewhere". Keep the names identical to the front matter.
 series:
   - name: Agent reliability
+    short: How agents vary from run to run, and when it matters.
     blurb: >-
       Run the same agent on the same task many times. Where does behaviour
       vary, which variation reaches the outcome, and how do you measure that
       without fooling yourself?
-  - name: Agent runtime
-    blurb: >-
-      Replay, checkpointing and recovery. What a long-running agent's state
-      actually is, and what it takes to resume it.
   - name: Agent memory
+    short: Memory as state, and what happens when it changes.
     blurb: >-
       What an agent carries between steps, and why long-term memory is a state
       problem before it is a retrieval problem.
+  - name: New tech, explained
+    short: New AI tools and terms, where they fit, and whether they work.
+    blurb: >-
+      A new model, technique or term: what it is, where you would and wouldn't
+      use it, and what the evidence actually says.
+  - name: AI companies
+    short: How AI companies create value, and what their valuations assume.
+    blurb: >-
+      Company analyses built from primary evidence: how the company got here,
+      where it sits, and what its valuation already prices in.
+  - name: Systems, Seen
+    short: Visual stories about systems you usually can't see.
+    blurb: >-
+      Interactive visual stories about software systems, drawn from their own
+      history and data.
+  - name: Agent runtime
+    short: Replay, checkpoints, and resuming long-running agents.
+    blurb: >-
+      Replay, checkpointing and recovery. What a long-running agent's state
+      actually is, and what it takes to resume it.
   - name: AI systems
+    short: The inference and serving stack underneath agents.
     blurb: >-
       The inference and serving infrastructure underneath agent workloads,
       learned by deploying it.
-
 defaults:
   - scope: { path: "", type: "posts" }
     values: { layout: "post" }

@@ -3,6 +3,7 @@ title: "The question mattered more than the model"
 description: >-
   Jev, a new "decision model", launched with big claims. Two independent tests point
   somewhere more useful: how you ask changed the result more than which model answered.
+series: New tech, explained
 image: /assets/img/jev-one-question-vs-five.png
 date: 2026-09-27 18:00:00 -0700
 ---

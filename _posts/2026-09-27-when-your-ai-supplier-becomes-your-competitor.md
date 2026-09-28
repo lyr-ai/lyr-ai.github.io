@@ -4,6 +4,7 @@ description: >-
   Harvey is growing fast between frontier labs moving up into legal software and legal
   incumbents moving down. Its answer so far isn't to replace its model suppliers: it's to
   own more of the layer between models and legal work. Is that enough?
+series: AI companies
 image: /assets/img/harvey-supplier-and-competitor.png
 date: 2026-09-27 20:00:00 -0700
 ---
