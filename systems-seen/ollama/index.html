@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The engine kept moving</title>
+<meta name="description" content="Three years of Ollama's history: the product surface only grew, while the inference engine moved four times and ended split by model format.">
+<meta property="og:title" content="The engine kept moving. The surface kept working.">
+<meta property="og:description" content="Ollama's inference engine moved four times under a surface that was never broken, and ended split by model format.">
+<meta property="og:image" content="https://lyr-ai.github.io/assets/img/systems-seen-ollama-engine.png">
+<meta name="twitter:card" content="summary_large_image">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f5f0e6;--wash:#ede5d6;--ink:#2a2826;--muted:#7a7368;--rule:#d8cfbf;--sage:#4f6f58;--ochre:#9c7424;--cin:#b8432c;--ghost:#bdb5a6}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--paper:#1a1916;--wash:#24221e;--ink:#ebe5d9;--muted:#9c9587;--rule:#3b3731;--sage:#93b69d;--ochre:#d0a95b;--cin:#e2765c;--ghost:#57524a}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Newsreader,Georgia,serif}
+main{max-width:1180px;margin:0 auto;padding:28px 16px 40px}
+.fig{font:500 12px 'IBM Plex Mono',monospace;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+h1{font-weight:400;font-size:clamp(30px,4.2vw,50px);margin:.25em 0 .1em;line-height:1.1}
+.say{font-size:clamp(18px,2vw,23px);min-height:3.2em;margin:.4em 0 .6em;max-width:44em}
+.say i{color:var(--muted)}
+svg{width:100%;height:auto;display:block}
+.chart{overflow-x:auto;overscroll-behavior-x:contain}
+.hint{display:none;font:12px 'IBM Plex Mono',monospace;color:var(--muted);margin:4px 0}
+@media (max-width:760px){.chart svg{min-width:880px}.hint{display:block}}
+.steps{display:flex;gap:8px;margin:12px 0 0;flex-wrap:wrap}
+.steps button{font:500 13px 'IBM Plex Mono',monospace;background:none;border:1px solid var(--rule);color:var(--muted);padding:7px 12px;border-radius:3px;cursor:pointer}
+.steps button.on{border-color:var(--ink);color:var(--ink)}
+.src{font:12px/1.6 'IBM Plex Mono',monospace;color:var(--muted);margin-top:22px;max-width:70em}
+.mono{font-family:'IBM Plex Mono',monospace}
+.s2,.s3,.s4{transition:opacity .5s}
+[data-step="1"] .s2,[data-step="1"] .s3,[data-step="1"] .s4{opacity:0}
+[data-step="2"] .s3,[data-step="2"] .s4{opacity:0}
+[data-step="3"] .s4{opacity:0}
+[data-step="3"] .notgguf{opacity:.18}
+.path{stroke-dasharray:var(--len);stroke-dashoffset:var(--len)}
+[data-step="2"] .path,[data-step="3"] .path,[data-step="4"] .path{stroke-dashoffset:0;transition:stroke-dashoffset 2.4s ease-in-out}
+</style></head><body><main id="m" data-step="1">
+<div class="fig">Systems, Seen · №2 · ollama/ollama, 2023–2026</div>
+<h1>The engine kept moving. The surface kept working.</h1>
+<p class="say" id="say"></p>
+<p class="hint">scroll the chart sideways →</p><div class="chart"><svg viewBox="0 0 1150 560" role="img" aria-labelledby="t d"><title id="t">Where Ollama's inference engine lived, 2023–2026</title><desc id="d">A continuous product surface on top that only grows; underneath, the inference engine moves between four ownership lanes and ends split by model format.</desc>
+<g id="g"></g></svg></div>
+<div class="steps" id="steps"></div>
+<p class="src">From the repository's own history (github.com/ollama/ollama, full clone, HEAD 16b4376a). Engine phases: 6093a88c · 42998d79 · b754f5a6 · ed443a03 · dcfb7a10 · d8cc798c · 9db4bdba · 2e036e7c. Surface: 7a0899d6 /api/chat · 453f572f /v1 · b9f5e16c /api/embed · 8b894933 /api/me; the 2023 commands and endpoints exist at every checkpoint. Only one reason is stated by the maintainers (9db4bdba), quoted as written; nothing about performance or cost is claimed.</p>
+</main>
+<script>
+const X0=new Date('2023-06-01'),X1=new Date('2026-10-01'),L=265,R=1015;
+const x=d=>L+(R-L)*(new Date(d)-X0)/(X1-X0);
+const lanes=[['build','Ollama builds its own',235],['vendor','copied into the repo',310],['borrow-in','borrowed · in-process',385],['borrow-proc','borrowed · separate process',460]];
+const Y=Object.fromEntries(lanes.map(l=>[l[0],l[2]]));
+const g=document.getElementById('g');let h='';
+const T=(s)=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+// axis years
+for(const y of [2024,2025,2026]){h+=`<line x1="${x(y+'-01-01')}" y1="60" x2="${x(y+'-01-01')}" y2="500" stroke="var(--rule)"/><text x="${x(y+'-01-01')+6}" y="518" class="mono" font-size="13" fill="var(--muted)">${y}</text>`}
+h+=`<text x="${x('2023-06-22')}" y="518" class="mono" font-size="13" fill="var(--muted)">2023</text>`;
+// surface: grows at additions (band thickness)
+const adds=[['2023-06-22',10,''],['2023-12-04',14,'chat'],['2024-02-07',19,'OpenAI /v1'],['2024-07-15',22,'embed'],['2025-09-17',26,'accounts']];
+let topP=`M${x('2023-06-22')},${100-adds[0][1]/2}`;let bot=[];
+adds.forEach((a,i)=>{const nx=i+1<adds.length?x(adds[i+1][0]):R;topP+=` L${x(a[0])},${100-a[1]/2} L${nx},${100-a[1]/2}`;bot.push([x(a[0]),nx,100+a[1]/2])});
+let bp='';bot.slice().reverse().forEach(b=>{bp+=` L${b[1]},${b[2]} L${b[0]},${b[2]}`});
+h+=`<path d="${topP}${bp} Z" fill="var(--sage)" opacity=".85"/>`;
+adds.slice(1).forEach((a,i)=>{const up=i%2?16:0;h+=`<line x1="${x(a[0])}" y1="${100-a[1]/2-4}" x2="${x(a[0])}" y2="${100-a[1]/2-14-up}" stroke="var(--sage)"/><text x="${x(a[0])}" y="${100-a[1]/2-18-up}" text-anchor="middle" class="mono" font-size="11.5" fill="var(--muted)">+ ${a[2]}</text>`});
+h+=`<text x="${L-14}" y="95" text-anchor="end" font-size="17" fill="var(--ink)">what users run</text><text x="${L-14}" y="113" text-anchor="end" class="mono" font-size="11" fill="var(--muted)">ollama run · /api</text>`;
+h+=`<text x="${R}" y="146" text-anchor="end" font-style="italic" font-size="15" fill="var(--muted)">nothing a 2023 user relied on was removed</text>`;
+// lanes (s2)
+h+='<g class="s2">';
+h+=`<text x="${L-14}" y="196" text-anchor="end" class="mono" font-size="11" letter-spacing="1.5" fill="var(--muted)">WHERE THE ENGINE LIVES</text>`;
+lanes.forEach(l=>{h+=`<line x1="${L}" y1="${l[2]}" x2="${R}" y2="${l[2]}" stroke="var(--rule)" stroke-dasharray="2 5"/><text x="${L-14}" y="${l[2]+5}" text-anchor="end" font-size="15.5" fill="var(--ink)">${l[1]}</text>`});
+h+=`<text x="${L-14}" y="${Y['build']-28}" text-anchor="end" class="mono" font-size="10.5" fill="var(--muted)">↑ Ollama owns more</text>`;
+// engine segments: [from,to,lane,label,class,state]
+const seg=[
+ ['2023-07-03','2023-08-30','borrow-in','Go bindings','notgguf past'],
+ ['2023-08-30','2024-10-30','borrow-proc','llama.cpp server, built by Ollama','gguf past'],
+ ['2024-10-30','2026-05-29','vendor','vendored llama.cpp','gguf ended'],
+ ['2024-12-17','2026-05-29','build','Ollama engine (GGML)','gguf ended'],
+ ['2026-05-29','2026-09-26','borrow-proc','upstream llama-server','gguf now s3'],
+];
+const col={past:'var(--ink)',ended:'var(--ghost)',now:'var(--sage)'};
+// connectors (vertical moves at transitions)
+const moves=[['2023-08-30','borrow-in','borrow-proc','notgguf'],['2024-10-30','borrow-proc','vendor','gguf'],['2024-12-17','vendor','build','gguf'],['2026-05-29','build','borrow-proc','gguf s3']];
+moves.forEach(m=>{h+=`<path class="path ${m[3]}" style="--len:400" d="M${x(m[0])},${Y[m[1]]} C${x(m[0])+18},${Y[m[1]]} ${x(m[0])-18},${Y[m[2]]} ${x(m[0])},${Y[m[2]]}" fill="none" stroke="var(--ink)" stroke-width="2" opacity=".55"/>`;
+ h+=`<line x1="${x(m[0])}" y1="170" x2="${x(m[0])}" y2="${Math.max(Y[m[1]],Y[m[2]])}" stroke="var(--ochre)" stroke-width="1" opacity=".35"/>`});
+seg.forEach(s=>{const[a,b,lane,lab,cls]=s,st=cls.split(' ')[1],x1=x(a),x2=x(b),y=Y[lane];
+ h+=`<g class="${cls.split(' ')[0]} ${cls.split(' ')[2]||''}"><path class="path" style="--len:${x2-x1+2}" d="M${x1},${y} L${x2},${y}" stroke="${col[st]}" stroke-width="${st==='now'?7:5}" stroke-linecap="round"/>`;
+ if(st==='ended')h+=`<circle cx="${x2}" cy="${y}" r="6" fill="var(--paper)" stroke="var(--ghost)" stroke-width="2.5"/>`;
+ const endLab=st==='now';const lx=endLab?x2:(lab==='Go bindings'?x1:x1+8);
+ h+=`<text x="${lx}" y="${endLab?y+22:y-11}" text-anchor="${endLab?'end':'start'}" font-size="14" fill="${st==='ended'?'var(--muted)':'var(--ink)'}">${T(lab)}</text></g>`});
+h+='</g>';
+// s3: the apparent reversal (GGUF path) annotation
+h+=`<g class="s3"><text x="${x('2026-05-29')-10}" y="${Y['borrow-proc']+44}" text-anchor="end" font-size="15" font-style="italic" fill="var(--ink)">vendor → build → borrow</text><text x="${R+10}" y="${Y['borrow-proc']+4}" class="mono" font-size="12" fill="var(--sage)">GGUF</text></g>`;
+// s4: MLX build path
+h+=`<g class="s4 notgguf"><path d="M${x('2026-02-02')},${Y['build']+18} L${x('2026-09-15')},${Y['build']+18}" stroke="var(--sage)" stroke-width="7" stroke-dasharray="3 7" stroke-linecap="round"/><path d="M${x('2026-09-15')},${Y['build']+18} L${x('2026-09-26')},${Y['build']+18}" stroke="var(--sage)" stroke-width="7" stroke-linecap="round"/>
+<text x="${x('2026-02-02')}" y="${Y['build']+44}" font-size="14" fill="var(--ink)">Ollama's MLX engine</text><text x="${x('2026-02-02')}" y="${Y['build']+60}" class="mono" font-size="11" fill="var(--muted)">experimental → not (2026-09)</text>
+<text x="${R+10}" y="${Y['build']+22}" class="mono" font-size="12" fill="var(--sage)">safetensors</text></g>`;
+g.innerHTML=h;
+const say={1:'Everything a 2023 user relied on is still there. The surface stayed compatible and only <b>added</b>: chat, an OpenAI-compatible API, embeddings, accounts.',
+2:'Underneath, the inference engine kept moving: from bindings, to llama.cpp\'s server in its own process, to a copy inside the repo, to an engine of Ollama\'s own.',
+3:'In 2026 Ollama removed its own GGML engine and the copied llama.cpp, and ran upstream llama.cpp\'s server instead. <i>So building its own engine failed?</i>',
+4:'Not exactly. It borrowed for one model format and built for the other. The decision wasn\'t build <i>or</i> borrow; it was <b>where to own the engine</b>. Their stated reason: "to more rapidly pick up new capabilities and fixes from llama.cpp."'};
+const m=document.getElementById('m'),sb=document.getElementById('steps');
+function go(n){const c=document.querySelector('.chart');if(c&&c.scrollWidth>c.clientWidth)c.scrollTo({left:n>=3?c.scrollWidth:0,behavior:'smooth'});m.dataset.step=n;document.getElementById('say').innerHTML=say[n];[...sb.children].forEach((b,i)=>b.classList.toggle('on',i+1==n))}
+['1 · the surface','2 · underneath','3 · a reversal?','4 · the split'].forEach((t,i)=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>go(i+1);sb.appendChild(b)});
+document.addEventListener('keydown',e=>{const s=+m.dataset.step;if(e.key==='ArrowRight'&&s<4)go(s+1);if(e.key==='ArrowLeft'&&s>1)go(s-1)});
+go(1);
+</script></body></html>
