@@ -14,14 +14,14 @@ top of frontier models: in September 2026 it raised $550M at a $15.5B valuation,
 co-founder said it had crossed $400M in annual recurring revenue.
 
 This year, the companies whose models Harvey builds on started selling legal AI too.
-Anthropic launched a legal plugin for Claude in January and Claude for Legal in May. In
-September OpenAI released Astra for Law, a version of its newest model configured for
+Anthropic released its first legal plugin at the end of January and expanded it into Claude
+for Legal in May. In September OpenAI released Astra for Law, a version of its newest model configured for
 legal work.
 
-So Harvey's suppliers are becoming its competitors. Yet Harvey's revenue is accelerating,
-not collapsing. And its response so far isn't to replace the labs. It's to own more of
-the layer between their models and legal work: benchmarks, post-trained models, workflows,
-and people inside law firms.
+So Harvey's suppliers are becoming its competitors. Yet Harvey's reported ARR continued to
+rise sharply. And in the same period, rather than replacing the labs, Harvey has been
+investing in more of the layer between their models and legal work: benchmarks,
+post-trained models, workflows, and people inside law firms.
 
 This piece looks at how Harvey got here, where it sits, and what its valuation assumes.
 The question it ends on is whether owning more of that layer is enough.
@@ -61,7 +61,7 @@ company chose to announce.
 
 <figure>
   <img src="/assets/img/harvey-supplier-and-competitor.png" alt="Layered map. Top layer, models: OpenAI and Anthropic, open-weight bases (Kimi, GLM, Qwen), RELX/LexisNexis legal content. Middle layer, legal AI products: Harvey, Legora, Thomson Reuters. Bottom layer: law firms and legal teams, and in-house builds such as Freshfields on Claude. The labs supply models to Harvey, host Harvey as a plugin in ChatGPT, and sell legal products (Claude for Legal, Astra for Law) directly to law firms. Harvey sells seats and deployment to law firms. Harvey's LAB benchmark and Tenet research preview are drawn dashed. Legora and Thomson Reuters compete for the same customers; RELX licenses content to Harvey." loading="lazy">
-  <figcaption><b>Figure 2.</b> The same labs play three roles around Harvey. Everyone else attacks from the edges.</figcaption>
+  <figcaption><b>Figure 2.</b> The same labs play three roles around Harvey. Other competitors enter from different layers.</figcaption>
 </figure>
 
 The unusual part isn't that frontier labs compete with Harvey. It's that the same companies
@@ -93,8 +93,8 @@ Around that centre, the pressure comes from other directions:
 
 ## What Harvey actually owns
 
-Measured by what it sells and whom it hires, Harvey is still an application and deployment
-company:
+Judging by what Harvey sells and where it is hiring, it still looks primarily like an
+application and deployment company:
 
 - **Customers.** The co-founder says Harvey has more than 3,000 customers, including 80% of
   the top 100 US law firms, 20% of the Fortune 500 and half of the Fortune 10. How many of
@@ -129,14 +129,14 @@ application layer. The bet is not yet a business.
 </figure>
 
 At $15.5B and more than $400M in ARR, Harvey is valued at no more than about 39 times its
-recurring revenue. That's lower than at its earlier rounds, because revenue grew faster
+recurring revenue. That's lower than at its earlier rounds, because reported ARR grew faster
 than the valuation, but it's still far from the incumbents. Thomson Reuters and RELX trade at
 roughly 5–6 times their sales. Legora sits in the same range as Harvey.
 
 These numbers measure different things (a private round's valuation against reported ARR,
 against a public company's enterprise value over a year of total revenue), so the
-comparison isn't precise. What it shows is scale: investors are paying for a future very
-unlike a mature legal-information business.
+comparison isn't precise. What it shows is scale: the multiples imply expectations very
+different from those attached to mature legal-information businesses.
 
 That leads to the useful question. It isn't "is Harvey worth $15.5B?" but **what has to
 become true for Harvey to grow into these expectations?**
@@ -200,7 +200,8 @@ relationship.
 
 ---
 
-*Sources: Harvey's blog (the Tenet research preview; post-training with Baseten; BigLaw
+*Sources: Anthropic's public knowledge-work-plugins repository (the legal plugin is in its
+first commit, 2026-01-29); Harvey's blog (the Tenet research preview; post-training with Baseten; BigLaw
 Bench Arena); LawSites on the September 2026 round and on Astra for Law; TechCrunch and
 PointBlank on Claude for Legal; Freshfields on its Anthropic partnership; Harvey's job
 board (Ashby, read 2026-09-28); public-market multiples as of 2026-09-27. Revenue figures
