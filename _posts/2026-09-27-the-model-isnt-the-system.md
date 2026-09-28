@@ -1,9 +1,9 @@
 ---
 title: "The model isn't the system"
 description: >-
-  On one coding benchmark, the same model gained 14 points in one harness and lost 13 in
-  another. Benchmark numbers are partly system numbers, and changing the model means
-  re-testing the harness.
+  On one coding benchmark, switching from a minimal harness to each model's vendor harness
+  changed scores by as much as +14 points for one model and −13 for another. Benchmark
+  numbers are partly system numbers, and changing the model means re-testing the harness.
 series: New tech, explained
 image: /assets/img/harness-same-model-two-harnesses.png
 date: 2026-09-27 18:30:00 -0700
@@ -19,9 +19,9 @@ it. The score belongs to the pair.
 How much does the harness matter? One benchmark ran the same models in different
 harnesses, and the answer is: enough to flip the result.
 
-On Terminal-Bench 2.0, **the same model gained up to 14 points in one harness and lost
-up to 13 in another, compared with a minimal one.** And the direction depended on which
-harness it was.
+On Terminal-Bench 2.0, **switching from a minimal harness to each model's vendor harness
+changed scores by as much as +14 points for one model and −13 for another.** And the
+direction depended on which harness it was.
 
 <figure>
   <img src="/assets/img/harness-same-model-two-harnesses.png" alt="Dumbbell chart from Terminal-Bench 2.0. Each model is shown in a minimal harness (Terminus 2) and in its vendor's own harness. With Codex CLI, GPT-5 goes from 35.2% to 49.6% (+14.4), GPT-5.2 from 54.0% to 62.9% (+8.9), GPT-5-Mini from 24.0% to 31.9% (+7.9). With Claude Code, Opus 4.5 goes from 57.8% to 52.1% (−5.7), Opus 4.1 from 38.0% to 34.8% (−3.2), Sonnet 4.5 from 42.8% to 40.1% (−2.7), Haiku 4.5 from 28.3% to 27.5% (−0.8); these are within noise. With Gemini CLI, Gemini 2.5 Pro goes from 32.6% to 19.6% (−13.0), Gemini 2.5 Flash from 16.9% to 15.4% (−1.5)." loading="lazy">
