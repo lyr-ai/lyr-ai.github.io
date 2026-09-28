@@ -38,6 +38,29 @@ each question narrow, and combine the answers in your own code.
 
 That advice turns out to be the whole story.
 
+## Where would I use it?
+
+Vercel, which serves Jev through its AI Gateway, draws the line in one sentence: "Choose
+Jev for bounded decisions, code for fixed rules, and a generative model for prose." In a
+real agent or app, that looks like this:
+
+| Decision point | Jev? | Why |
+|---|---|---|
+| Route a request or ticket to the right team or agent | Yes | A choice from a known list |
+| Review a proposed tool call: run it, or pause for approval | Yes, as one input | A yes/no with a probability; the permission itself stays in code |
+| Score a generated answer against stated requirements | Yes | A bounded score |
+| Write the reply to the user | No | "Jev does not generate prose"; use an LLM |
+| Check a fixed rule, like `balance > 100` | No | Ordinary code is exact and free |
+| Decide an open-ended plan or strategy | Probably not | My judgment: it needs reasoning that doesn't reduce to a few fixed options |
+
+The first three rows are uses Vercel lists (alongside prioritizing tickets, categorizing
+documents, moderation and choosing which model answers). Vercel also says the guardrail
+doesn't replace permissions: "Enforce access rules and required approvals in application
+code before executing a tool."
+
+The short version: **use it at bounded decision points, not everywhere you'd use an LLM.**
+The tests below show how well it holds up there.
+
 ## Test 1: one question or five
 
 An independent benchmark (jev-phishing-bench) ran Jev and Claude Haiku 4.5 on 2,000
@@ -119,7 +142,9 @@ If you use a decision model like Jev:
 
 ---
 
-*Sources: TypeSafe's launch post and documentation; jev-phishing-bench
+*Sources: TypeSafe's launch post and documentation; Vercel's guides "When should you use
+Jev instead of a chat model?", "7 practical Jev use cases" and "Where does Jev fit in an
+AI agent loop?"; jev-phishing-bench
 (github.com/anisselbd/jev-phishing-bench); jev-does-not-play-dice
 (github.com/KantaHayashiAI/jev-does-not-play-dice); the tool-call risk benchmark by
 webofmike on dev.to. Each number was read on the original page or repository.*
