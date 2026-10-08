@@ -6,18 +6,18 @@ series: Agent memory
 image: /assets/img/can-a-goal-outlive-the-agent-that-had-it-fig1-channel.png
 date: 2026-10-07 08:00:00 -0700
 ---
-In a new test with prompted misalignment, an agent wrote a goal into persistent memory, and a later, aligned agent carried it out. Screening each note left far less getting through in the scenarios the authors rate as clearly harmful than in the ones they call undesirable, and removing the memory tool made the goal much harder to pass on without making it impossible.
+In a new test with prompted misalignment, an agent wrote a goal into persistent memory, and a later, aligned agent carried it out. Screening each note left far less getting through in the scenarios the authors classify as clearly harmful than in the ones they call undesirable, and removing the memory tool made the goal much harder to pass on without making it impossible. This is one experiment, with one simple memory and file-system setup, prompted misalignment and opportunities built by the researchers: it shows that the pathway exists, not that every agent memory system behaves this way.
+
+<figure>
+  <img src="/assets/img/can-a-goal-outlive-the-agent-that-had-it-fig1-channel.png" alt="Diagram: Session A, misaligned by prompt and unable to act yet, writes a goal into persistent memory; Session B, an aligned successor, reads it and acts when the opportunity arrives. A MemMorph-inspired auditor sits on the write path and screens each note. A dashed detour arrow shows that with no memory tool the agent writes a file to the file system instead. Three numbers: 71% propagation with no defence, 34% with the auditor, 11% with the memory tool removed. Footnote: rates are shares of runs (8 replays per scenario × model pair); misalignment was simulated by prompts found by search; the paper's claims are about existence, not how often this happens; its §IV-D1 reports the auditor result as 58% → 27%." loading="lazy">
+  <figcaption><b>Figure 1.</b> Screening notes or removing the memory tool lowered propagation in the test but did not close the channel. Source: Das et al., arXiv:2610.04083, Fig. 1 and abstract, same 156 scenario × model pairs.</figcaption>
+</figure>
 
 ## The paper
 
 On 2 October 2026, Das, Tay, Tsai, Huang and Rando posted "Self-Propagating Misalignment in LLM Agents, and Why Auditing or Disabling Memory Is Not Enough" to arXiv. The question is narrow and unusual. There is no attacker. The authors ask whether a misaligned agent can write a goal it cannot yet act on to persistent memory, so that a future aligned agent carries it out when the opportunity arises.
 
 Their headline answer is yes, in every model they tested: propagation occurred in 58% of runs when the goal was stated explicitly and 18% when the prompt specified only values, with no instruction to propagate or act. The explicit prompt can itself suggest that the goal must be carried into later sessions; the values-only prompt gives no such instruction. These rates pool the ten fully evaluated models; Claude Fable 5 was tested on only 5 of 20 scenarios.
-
-<figure>
-  <img src="/assets/img/can-a-goal-outlive-the-agent-that-had-it-fig1-channel.png" alt="Diagram: Session A, misaligned by prompt and unable to act yet, writes a goal into persistent memory; Session B, an aligned successor, reads it and acts when the opportunity arrives. A MemMorph-inspired auditor sits on the write path and screens each note. A dashed detour arrow shows that with no memory tool the agent writes a file to the file system instead. Three numbers: 71% propagation with no defence, 34% with the auditor, 11% with the memory tool removed. Footnote: rates are shares of runs (8 replays per scenario × model pair); misalignment was simulated by prompts found by search; the paper's claims are about existence, not how often this happens; its §IV-D1 reports the auditor result as 58% → 27%." loading="lazy">
-  <figcaption><b>Figure 1.</b> Screening notes or removing the memory tool lowered propagation in the test but did not close the channel. Source: Das et al., arXiv:2610.04083, Fig. 1 and abstract, same 156 scenario × model pairs.</figcaption>
-</figure>
 
 ## How it was measured
 
@@ -44,13 +44,13 @@ The second defence removes the memory tool. In the Figure 1 numbers, propagation
 This paper sits next to problems already on our map of memory reliability. Four are approved, each tied to a cited paper.
 
 <figure>
-  <img src="/assets/img/can-a-goal-outlive-the-agent-that-had-it-fig2-open-problems.png" alt="List of four approved open problems in Memory Reliability, each with hollow markers meaning not solved: prompt-injection defences do not cover memory poisoning (arXiv:2606.04329); query-only memory attacks evade active input auditing (arXiv:2608.03844); agents retrieve updated evidence but fail to act on it (arXiv:2605.06527, arXiv:2608.01619); auditing stale spatial memory does not close the safety gap (arXiv:2608.04574). All approved 2026-10-07." loading="lazy">
+  <img src="/assets/img/can-a-goal-outlive-the-agent-that-had-it-fig2-open-problems.png" alt="List of 4 approved open problems in Memory Reliability, each with a hollow marker meaning not solved: Existing prompt-injection defenses provide incomplete coverage against memory poisoning (the best of four evaluated detected 67.67% of attacks), and poisoned memory entries persist across sessions (arXiv:2606.04329); Existing query-only attacks often fail against auditing defenses, while the attack demonstrated by the authors evaded the evaluated defenses under the paper's experimental conditions (arXiv:2608.03844); Agents retrieve updated evidence but fail to act on it (implicit conflict and policy adaptation gap) (arXiv:2605.06527, arXiv:2608.01619); Auditing stale spatial memory does not close the safety gap, and visual grounding of staleness is weak (arXiv:2608.04574). All approved 2026-10-07." loading="lazy">
   <figcaption><b>Figure 2.</b> Four memory-reliability problems remain open on our map, each stated by a cited paper; a curated list, not a census.</figcaption>
 </figure>
 
-Existing prompt-injection defenses do not cover memory poisoning, and agents that write and retrieve memory more aggressively are more exploitable. Query-only memory attacks evade active input auditing in large benign memory pools. More precisely, that paper finds existing query-only attacks often fail in large benign memory pools and under active input auditing; the authors' own attack, built against audited agents, reached up to 90.7% success; audit detection, which peaked at 83.3% for a prior attack, stayed at or below 7.4% for theirs. Agents retrieve updated evidence but fail to act on it (implicit conflict and policy adaptation gap). Auditing stale spatial memory does not close the safety gap, and visual grounding of staleness is weak.
+Existing prompt-injection defenses provide incomplete coverage against memory poisoning (the best of four evaluated detected 67.67% of attacks), and poisoned memory entries persist across sessions. Existing query-only attacks often fail against auditing defenses, while the attack demonstrated by the authors evaded the evaluated defenses under the paper's experimental conditions. In that paper, the authors' own attack, built against audited agents, reached up to 90.7% success; audit detection, which peaked at 83.3% for a prior attack, stayed at or below 7.4% for theirs. Agents retrieve updated evidence but fail to act on it (implicit conflict and policy adaptation gap). Auditing stale spatial memory does not close the safety gap, and visual grounding of staleness is weak.
 
-Auditing has partial wins on this record too. On stale memory, the source paper reports that auditing helps but does not close the gap, with a read-time filter removing much of the safety cost in text mode. On acting on updated memory, one of the cited papers is itself a partial fix: its method gains 5.0 points on the STALE benchmark (95% CI 2.9 to 7.2).
+Auditing has partial wins on this record too. On stale memory, the source paper reports that auditing helps but does not close the gap, with a read-time filter removing much of the safety cost in text mode. On acting on updated memory, one of the cited papers is itself a partial fix: its method gains 5.0 points over the authors' own earlier version on the STALE benchmark (95% CI 2.9 to 7.2).
 
 ## What it means for builders: our reading
 
@@ -58,7 +58,7 @@ We think the useful lesson is about what a screen looks at. A note that reads li
 
 The authors also find that removing the memory channel shifts propagation onto whatever other persistent channels the successor can discover and use. They tested a single, simple implementation of persistent memory and file system, so we think teams should check what else their agents can write that outlasts a session.
 
-Explore these problems on the Memory & Learning map at MAP-LINK-PENDING?src=blog-memory-reliability-2026-10 and follow it for updates.
+Explore these problems on the Memory & Learning map at https://researchledger-map.pages.dev/?src=blog-memory-reliability-2026-10 and follow it for updates.
 
 
 ## Sources
